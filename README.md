@@ -1,36 +1,60 @@
 # Beckerman Companion
 
-Household tool for Simon and Chiara: **travel-day tracking** for UK Statutory Residence Test day counts, backed by Supabase and exposed to Claude (and similar clients) via **MCP**. This repository holds the specification, handbook, and (as we build it) the Edge Function and tests.
+Household tool for Simon and Chiara: **travel-day tracking** for UK Statutory Residence Test day counts, backed by Supabase and exposed to Claude (and similar clients) via **MCP**.
 
 ## Documentation
 
-Detail lives in `docs/`; this file stays a short index and operations checklist.
+Detail lives in `docs/`; this file is the short index and day-to-day checklist.
 
 | Document | Purpose |
 | ---------- | ------- |
-| [docs/SPEC.md](docs/SPEC.md) | Product and technical specification: schema, tools, counting rules, deliverables |
-| [docs/PROJECT.md](docs/PROJECT.md) | Setup: GitHub, Supabase CLI and MCP, tokens, country strings, Git remote |
+| [docs/CONNECT.md](docs/CONNECT.md) | **Start here:** GitHub, Supabase link, secrets, deploy, Claude MCP |
+| [docs/SPEC.md](docs/SPEC.md) | Product and technical specification |
+| [docs/PROJECT.md](docs/PROJECT.md) | CLI vs MCP, tokens, country strings, handbook |
+| [docs/mcp-claude.sample.json](docs/mcp-claude.sample.json) | Example Claude MCP config (URL + bearer token) |
 | [docs/israel_move_source_of_truth.md](docs/israel_move_source_of_truth.md) | Factual basis (add when available) |
 | [docs/israel_move_year_one_priorities.md](docs/israel_move_year_one_priorities.md) | Principles (add when available) |
 
-Cursor agent rules live in `.cursor/rules/`.
+Cursor agent rules: `.cursor/rules/`.
 
 ## Operations
 
-Sections below will be filled in as the implementation in `docs/SPEC.md` is completed.
+### First-time connection
+
+Follow **[docs/CONNECT.md](docs/CONNECT.md)** end to end. You will run `gh auth login`, `supabase login`, `supabase link`, `supabase db push`, `supabase secrets set`, and `supabase functions deploy` (browser steps required for GitHub and Supabase).
 
 ### Add a trip manually
 
-Use SQL against the `trips` table (see `docs/SPEC.md` for columns) or the `log_trip` MCP tool once deployed. Example `INSERT` will be added here after migrations exist.
+**SQL** (Supabase SQL editor or `psql`), after migrations:
+
+```sql
+insert into public.trips (
+  person, departure_country, arrival_country, depart_date, arrive_date, created_by
+) values (
+  'simon', 'United Kingdom', 'France', '2026-06-01', '2026-06-02', 'simon'
+);
+```
+
+Or use the **`log_trip`** MCP tool against the deployed `beckerman-mcp` function with a valid bearer token.
 
 ### Run tests
 
-Document the test command here once the package and runner are in the repo (for example `npm test`).
+```bash
+npm install
+npm test
+```
 
 ### Redeploy the MCP Edge Function
 
-Document `supabase functions deploy` (or your chosen command) here once the function name and project link are fixed.
+```bash
+supabase functions deploy beckerman-mcp
+```
 
 ### Rotate household API tokens
 
-See **API tokens** in [docs/PROJECT.md](docs/PROJECT.md): generate new secrets, update Supabase Edge Function secrets, update each Claude connector, then retire old tokens.
+1. Generate new secrets (`openssl rand -base64 32`).
+2. `supabase secrets set COMPANION_TOKEN_SIMON='...' COMPANION_TOKEN_CHIARA='...'`
+3. Update each Claude MCP config with the new bearer for that person.
+4. Redeploy if your setup requires it; retire old secrets.
+
+Details: [docs/PROJECT.md](docs/PROJECT.md) (API tokens).

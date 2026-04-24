@@ -117,7 +117,7 @@ If tempted to add any of the above, use a TODO comment instead.
 
 1. Supabase project with `trips` table and RLS as specified.
 2. Edge Function deployed hosting the MCP server with the two tools.
-3. `.mcp.json` snippet (or equivalent) for Simon and Chiara: Claude connector URL and where each bearer token goes.
+3. Claude MCP config: [mcp-claude.sample.json](mcp-claude.sample.json) (copy per person with the right bearer token).
 4. Root `README.md`: how to add a trip manually, run tests, redeploy, rotate tokens (expand as implementation lands).
 5. Tests passing.
 

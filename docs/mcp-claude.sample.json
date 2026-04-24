@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "beckerman-companion": {
+      "type": "http",
+      "url": "https://YOUR_PROJECT_REF.supabase.co/functions/v1/beckerman-mcp",
+      "headers": {
+        "Authorization": "Bearer PASTE_SIMON_OR_CHIARA_TOKEN"
+      }
+    }
+  }
+}

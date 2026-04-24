@@ -2,6 +2,8 @@
 
 Long-lived operations and setup. Product and technical detail is in [SPEC.md](SPEC.md).
 
+**End-to-end connection (GitHub, Supabase, deploy, Claude):** [CONNECT.md](CONNECT.md).
+
 ## CLI vs MCP (what to install)
 
 **CLI** is a **command-line program** you run in Terminal (for example `supabase login`, `supabase db push`). It is how you link this repo to a Supabase project, run migrations, deploy Edge Functions, and manage deployment secrets.
