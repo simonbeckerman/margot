@@ -69,7 +69,7 @@ Returns:
 - `days_present`: number
 - `method`: `uk_midnight` if country is `United Kingdom`, else `inclusive_presence`
 - `range_start`, `range_end`: resolved window
-- `trips_considered`: trip ids used in the calculation
+- `trips_considered`: trip ids that fed the count (present in the shared counting module; **omitted in MCP tool responses** so the assistant’s context stays small)
 
 ## Counting logic
 
@@ -82,7 +82,7 @@ For each date `D` in the requested range:
 
 ### UK midnight rule (`country === 'United Kingdom'`)
 
-Count the day if the person was in the UK at **midnight at the end** of that day. Equivalent formulation: count `D` if they were in the UK on `D` **and** they did **not** depart the UK on `D`. If `depart_date === D` and `departure_country === 'United Kingdom'`, the day does **not** count. If `arrive_date === D` and `arrival_country === 'United Kingdom'`, the day **does** count.
+Count `D` if, **after** applying all depart and arrive **events** on that calendar day in the order the trips were stored (`created_at` ascending, then `id`, and within a same leg always depart then arrive), the person’s last location on that day is the United Kingdom. If a day has no move rows, the previous transition-based location still applies. Same-day return (for example out to Paris and back to London) therefore counts for the UK if the day’s last event is an arrival in the United Kingdom.
 
 **Do not** implement the SRT deeming-day rule in this phase. Leave a **TODO**: it needs transit days, qualifying days, and tie-count, which are out of scope.
 
@@ -117,7 +117,7 @@ If tempted to add any of the above, use a TODO comment instead.
 
 1. Supabase project with `trips` table and RLS as specified.
 2. Edge Function deployed hosting the MCP server with the two tools.
-3. Claude MCP config: [mcp-claude.sample.json](mcp-claude.sample.json) (copy per person with the right bearer token).
+3. Claude MCP config: [mcp-claude.sample.json](mcp-claude.sample.json) or [mcp.json.sample](../mcp.json.sample) at repo root (same JSON; copy per person with the right bearer token).
 4. Root `README.md`: how to add a trip manually, run tests, redeploy, rotate tokens (expand as implementation lands).
 5. Tests passing.
 

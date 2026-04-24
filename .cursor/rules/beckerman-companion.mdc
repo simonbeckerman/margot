@@ -9,7 +9,20 @@ Household tool for Simon and Chiara. Current scope is travel-day tracking for UK
 
 ## Audience
 
-The owner is **not** assumed to be a software expert. Use **plain language**, **short steps**, and avoid jargon unless it helps. If you use a technical term, add a **one-line plain explanation** when it helps. Favour what they can do next over theory. Lay-oriented explanations of tests and output live in `docs/TEST_RESULTS_EXPLAINED.md`.
+The owner is **not** assumed to be a software expert. Use **plain language**, **short steps**, and avoid jargon unless it helps. If you use a technical term, add a **one-line plain explanation** when it helps. Favour what they can do next over theory. A plain list of what each check does and the expected outcome: `docs/test-results.md`.
+
+## Writing principle
+
+**What cannot be said in few words cannot be said in many.** Prefer a short, clear line over a long one. If an idea is still muddy after a short pass, make it short again before you add more.
+
+## Testing
+
+- Prefer **local** checks for core counting, then a **light** live check, then a **full** path that matches real use: see `docs/test-results.md` and `package.json` scripts.
+- If a test **writes** to the real database, **remove** those rows afterward (or use clearly marked test data in the far future plus a final delete, like the e2e script). The main store should not keep leftover test travel lines.
+
+## MCP and Claude (context size)
+
+- The Edge `beckerman-mcp` tool should stay **tight** for the assistant: **short** tool `title` and `description` strings, **one-line** JSON in tool result text, and **no** large optional fields in responses (for example the trip id list is dropped on `days_in_country`; the shared module can still compute it for tests). Every token in tool metadata is paid on every turn that lists tools to the model.
 
 ## Decision principle
 
@@ -25,7 +38,7 @@ Do **not** narrow the plan because of unknown limits on what an agent can run or
 - Project handbook (setup, ops, tooling): `docs/PROJECT.md`
 - Connect GitHub, Supabase, deploy, Claude: `docs/CONNECT.md`
 - Repository overview and operations index: `README.md`
-- Non-expert guide to what tests mean: `docs/TEST_RESULTS_EXPLAINED.md`
+- What each test does and the expected result: `docs/test-results.md`
 - When present, read `docs/israel_move_source_of_truth.md` and `docs/israel_move_year_one_priorities.md` before large changes.
 
 ## Technical constraints
@@ -49,5 +62,5 @@ When the user asks to **commit**, **push**, or **commit and push** (or similar),
 - **This file:** scope, stack, style, out-of-scope items, and the decision principle.
 - **`docs/SPEC.md`:** schema, MCP tools, counting logic, deliverables.
 - **`docs/PROJECT.md`:** setup, installs, CLI vs MCP, tokens, GitHub, and other operations.
-- **`docs/TEST_RESULTS_EXPLAINED.md`:** tests and output in plain language (see **Audience** above).
+- **`docs/test-results.md`:** one-line “what we did” and one-line “expected result” for each check (see **Audience** and **Writing principle**); numbering includes all unit, smoke, and e2e rows.
 - **`README.md`:** entry point and operations index for humans.

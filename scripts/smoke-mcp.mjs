@@ -23,8 +23,12 @@ async function expect401WithoutToken() {
     body: '{}',
   })
   const ok = r.status === 401
-  console.log(`POST without Authorization: HTTP ${r.status} ${ok ? '(ok)' : '(expected 401)'}`)
-  if (!ok) process.exitCode = 1
+  const www = r.headers.get('www-authenticate') ?? ''
+  const hasPrm = www.toLowerCase().includes('resource_metadata')
+  console.log(
+    `POST without Authorization: HTTP ${r.status} ${ok ? '(ok)' : '(expected 401)'} www-authenticate resource_metadata=${hasPrm ? 'yes' : 'no'}`,
+  )
+  if (!ok || !hasPrm) process.exitCode = 1
 }
 
 function parseSseJson(text) {

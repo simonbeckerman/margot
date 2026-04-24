@@ -18,3 +18,12 @@ export function normalizeCountry(raw: string): string {
 export function isUnitedKingdom(country: string): boolean {
   return normalizeCountry(country) === 'United Kingdom'
 }
+
+/** Case-insensitive match for any country label (after UK normalization). */
+export function sameCountryName(a: string, b: string): boolean {
+  if (isUnitedKingdom(a) && isUnitedKingdom(b)) return true
+  if (isUnitedKingdom(a) || isUnitedKingdom(b)) return false
+  return (
+    normalizeCountry(a).toLowerCase() === normalizeCountry(b).toLowerCase()
+  )
+}

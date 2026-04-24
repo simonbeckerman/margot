@@ -3,7 +3,7 @@
  * TODO: SRT deeming-day rule (transit days, qualifying days, tie-count) is out of scope.
  */
 
-import { isUnitedKingdom, normalizeCountry } from './country.ts'
+import { isUnitedKingdom, normalizeCountry, sameCountryName } from './country.ts'
 
 export type Person = 'simon' | 'chiara'
 
@@ -14,7 +14,13 @@ export type TripRow = {
   arrival_country: string
   depart_date: string
   arrive_date: string
+  /** For ordering same-calendar-day legs (DB order / logging order). */
+  created_at?: string
 }
+
+const IN_TRANSIT = '__IN_TRANSIT__' as const
+
+type DayEvent = { trip: TripRow; kind: 'depart' | 'arrive' }
 
 export type RangeInput =
   | { type: 'uk_tax_year'; year: number }
@@ -77,22 +83,11 @@ function dayCountsForUnitedKingdom(
   date: string,
   personTrips: TripRow[],
   seedCountry: string,
+  ukMemo: Map<string, string>,
 ): boolean {
-  if (
-    personTrips.some(
-      (t) => t.depart_date === date && isUnitedKingdom(t.departure_country),
-    )
-  ) {
-    return false
-  }
-  if (
-    personTrips.some(
-      (t) => t.arrive_date === date && isUnitedKingdom(t.arrival_country),
-    )
-  ) {
-    return true
-  }
-  return isUnitedKingdom(countryFromTransitions(personTrips, date, seedCountry))
+  const loc = locationStringAtEndOfDay(personTrips, date, seedCountry, ukMemo)
+  if (loc === IN_TRANSIT) return false
+  return isUnitedKingdom(loc)
 }
 
 function dayCountsForOtherCountry(
@@ -107,19 +102,22 @@ function dayCountsForOtherCountry(
   }
   if (
     personTrips.some(
-      (t) => t.depart_date === date && normalizeCountry(t.departure_country) === want,
+      (t) =>
+        t.depart_date === date &&
+        sameCountryName(t.departure_country, want),
     )
   ) {
     return true
   }
   if (
     personTrips.some(
-      (t) => t.arrive_date === date && normalizeCountry(t.arrival_country) === want,
+      (t) =>
+        t.arrive_date === date && sameCountryName(t.arrival_country, want),
     )
   ) {
     return true
   }
-  return normalizeCountry(countryFromTransitions(personTrips, date, seedCountry)) === want
+  return sameCountryName(countryFromTransitions(personTrips, date, seedCountry), want)
 }
 
 export function countDayInCountry(
@@ -127,9 +125,11 @@ export function countDayInCountry(
   country: string,
   personTripsSorted: TripRow[],
   seedCountry: string = SEED_COUNTRY,
+  /** Shared when counting a range: avoids recomputing end-of-day state per D. */
+  ukMemo: Map<string, string> = new Map(),
 ): boolean {
   if (isUnitedKingdom(country)) {
-    return dayCountsForUnitedKingdom(date, personTripsSorted, seedCountry)
+    return dayCountsForUnitedKingdom(date, personTripsSorted, seedCountry, ukMemo)
   }
   return dayCountsForOtherCountry(date, country, personTripsSorted, seedCountry)
 }
@@ -154,6 +154,68 @@ function addOneDay(iso: string): string {
   return `${yy}-${mm}-${dd}`
 }
 
+function subtractOneDay(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  const dt = new Date(Date.UTC(y, m - 1, d))
+  dt.setUTCDate(dt.getUTCDate() - 1)
+  const yy = dt.getUTCFullYear()
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, '0')
+  const dd = String(dt.getUTCDate()).padStart(2, '0')
+  return `${yy}-${mm}-${dd}`
+}
+
+function dayEventsOnDate(trips: TripRow[], d: string): DayEvent[] {
+  const out: DayEvent[] = []
+  for (const t of trips) {
+    if (t.depart_date === d) out.push({ trip: t, kind: 'depart' })
+    if (t.arrive_date === d) out.push({ trip: t, kind: 'arrive' })
+  }
+  return out
+}
+
+function sortDayEvents(ev: DayEvent[]): void {
+  ev.sort((a, b) => {
+    const ca = a.trip.created_at ?? ''
+    const cb = b.trip.created_at ?? ''
+    if (ca !== cb) return ca.localeCompare(cb)
+    if (a.trip.id !== b.trip.id) return a.trip.id.localeCompare(b.trip.id)
+    if (a.kind === b.kind) return 0
+    return a.kind === 'depart' ? -1 : 1
+  })
+}
+
+/** Country (or in transit) at end of D after all depart/arrive events on that day, in log order. */
+function locationStringAtEndOfDay(
+  personTrips: TripRow[],
+  d: string,
+  seedCountry: string,
+  memo: Map<string, string>,
+): string {
+  const cached = memo.get(d)
+  if (cached !== undefined) return cached
+
+  const ev = dayEventsOnDate(personTrips, d)
+  if (ev.length === 0) {
+    const c = countryFromTransitions(personTrips, d, seedCountry)
+    memo.set(d, c)
+    return c
+  }
+
+  sortDayEvents(ev)
+  const prevD = subtractOneDay(d)
+  const start = locationStringAtEndOfDay(personTrips, prevD, seedCountry, memo)
+  let loc: string = start
+  for (const e of ev) {
+    if (e.kind === 'depart') {
+      loc = IN_TRANSIT
+    } else {
+      loc = normalizeCountry(e.trip.arrival_country)
+    }
+  }
+  memo.set(d, loc)
+  return loc
+}
+
 export type CountResult = {
   days_present: number
   method: 'uk_midnight' | 'inclusive_presence'
@@ -176,10 +238,11 @@ export function countDaysInCountry(
 
   const personTrips = tripsForPerson(allTrips, person)
   const method = isUnitedKingdom(country) ? 'uk_midnight' : 'inclusive_presence'
+  const ukMemo = new Map<string, string>()
 
   let days_present = 0
   for (const d of eachIsoDateInclusive(range_start, range_end)) {
-    if (countDayInCountry(d, country, personTrips, seedCountry)) {
+    if (countDayInCountry(d, country, personTrips, seedCountry, ukMemo)) {
       days_present++
     }
   }

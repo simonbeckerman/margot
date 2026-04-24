@@ -114,6 +114,59 @@ describe('countDaysInCountry', () => {
     expect(fr.days_present).toBe(3)
   })
 
+  it('same calendar day: UK to Israel, Israel counts, UK does not (midnight test)', () => {
+    const trips = simon([
+      {
+        id: 's1',
+        departure_country: 'United Kingdom',
+        arrival_country: 'Israel',
+        depart_date: '2026-09-20',
+        arrive_date: '2026-09-20',
+      },
+    ])
+    const uk = countDaysInCountry(
+      'simon',
+      'United Kingdom',
+      { type: 'custom', start: '2026-09-20', end: '2026-09-20' },
+      trips,
+    )
+    expect(uk.days_present).toBe(0)
+    const il = countDaysInCountry(
+      'simon',
+      'Israel',
+      { type: 'custom', start: '2026-09-20', end: '2026-09-20' },
+      trips,
+    )
+    expect(il.days_present).toBe(1)
+  })
+
+  it('Israel: arrival calendar day counts; UK does not count UK depart day (same leg)', () => {
+    const trips = simon([
+      {
+        id: 't1',
+        departure_country: 'United Kingdom',
+        arrival_country: 'Israel',
+        depart_date: '2026-04-05',
+        arrive_date: '2026-04-06',
+      },
+    ])
+    const ukDepartDayOnly = countDaysInCountry(
+      'simon',
+      'United Kingdom',
+      { type: 'custom', start: '2026-04-05', end: '2026-04-05' },
+      trips,
+    )
+    expect(ukDepartDayOnly.days_present).toBe(0)
+    const ilArriveDayOnly = countDaysInCountry(
+      'simon',
+      'Israel',
+      { type: 'custom', start: '2026-04-06', end: '2026-04-06' },
+      trips,
+    )
+    expect(ilArriveDayOnly.method).toBe('inclusive_presence')
+    expect(ilArriveDayOnly.days_present).toBe(1)
+  })
+
   it('range before any trips counts seed country for UK', () => {
     const trips = simon([])
     const uk = countDaysInCountry(
@@ -196,6 +249,155 @@ describe('countDaysInCountry', () => {
     )
     expect(uk.method).toBe('uk_midnight')
     expect(uk.days_present).toBeGreaterThan(100)
+  })
+
+  it('Italy: arrival day counts (same inclusive rule as Israel)', () => {
+    const trips = simon([
+      {
+        id: 'it1',
+        departure_country: 'United Kingdom',
+        arrival_country: 'Italy',
+        depart_date: '2026-05-10',
+        arrive_date: '2026-05-11',
+      },
+    ])
+    const italy = countDaysInCountry(
+      'simon',
+      'italy',
+      { type: 'custom', start: '2026-05-11', end: '2026-05-11' },
+      trips,
+    )
+    expect(italy.method).toBe('inclusive_presence')
+    expect(italy.days_present).toBe(1)
+  })
+
+  it('rejects custom range with start after end', () => {
+    expect(() =>
+      countDaysInCountry(
+        'simon',
+        'United Kingdom',
+        { type: 'custom', start: '2026-06-10', end: '2026-06-01' },
+        simon([]),
+      ),
+    ).toThrow(/Invalid range/)
+  })
+
+  it('same day: London to Paris to London, two legs: D counts 1 UK at end of day if return is logged after outbound', () => {
+    const trips = simon([
+      {
+        id: 'out',
+        departure_country: 'United Kingdom',
+        arrival_country: 'France',
+        depart_date: '2026-03-10',
+        arrive_date: '2026-03-10',
+        created_at: '2026-03-10T08:00:00.000Z',
+      },
+      {
+        id: 'back',
+        departure_country: 'France',
+        arrival_country: 'United Kingdom',
+        depart_date: '2026-03-10',
+        arrive_date: '2026-03-10',
+        created_at: '2026-03-10T18:00:00.000Z',
+      },
+    ])
+    const uk = countDaysInCountry(
+      'simon',
+      'United Kingdom',
+      { type: 'custom', start: '2026-03-10', end: '2026-03-10' },
+      trips,
+    )
+    expect(uk.days_present).toBe(1)
+  })
+
+  it('same day: London to Paris only (one leg, no return), D is not a UK day', () => {
+    const trips = simon([
+      {
+        id: 'one',
+        departure_country: 'United Kingdom',
+        arrival_country: 'France',
+        depart_date: '2026-07-15',
+        arrive_date: '2026-07-15',
+      },
+    ])
+    const uk = countDaysInCountry(
+      'simon',
+      'United Kingdom',
+      { type: 'custom', start: '2026-07-15', end: '2026-07-15' },
+      trips,
+    )
+    expect(uk.days_present).toBe(0)
+  })
+
+  it('two days: depart UK D1, arrive back in UK D2 on separate two legs', () => {
+    const trips = simon([
+      {
+        id: 'a',
+        departure_country: 'United Kingdom',
+        arrival_country: 'France',
+        depart_date: '2026-08-10',
+        arrive_date: '2026-08-10',
+      },
+      {
+        id: 'b',
+        departure_country: 'France',
+        arrival_country: 'United Kingdom',
+        depart_date: '2026-08-11',
+        arrive_date: '2026-08-11',
+      },
+    ])
+    const d1 = countDaysInCountry(
+      'simon',
+      'United Kingdom',
+      { type: 'custom', start: '2026-08-10', end: '2026-08-10' },
+      trips,
+    )
+    const d2 = countDaysInCountry(
+      'simon',
+      'United Kingdom',
+      { type: 'custom', start: '2026-08-11', end: '2026-08-11' },
+      trips,
+    )
+    expect(d1.days_present).toBe(0)
+    expect(d2.days_present).toBe(1)
+  })
+
+  it('no trips: Israel count is zero in a custom window', () => {
+    const z = countDaysInCountry(
+      'simon',
+      'Israel',
+      { type: 'custom', start: '2026-01-01', end: '2026-01-10' },
+      simon([]),
+    )
+    expect(z.days_present).toBe(0)
+    expect(z.method).toBe('inclusive_presence')
+  })
+
+  it('query window fully inside a long in-air leg: UK before arrival still uses seed/transition', () => {
+    const trips = simon([
+      {
+        id: 'leg',
+        departure_country: 'United Kingdom',
+        arrival_country: 'United States',
+        depart_date: '2026-06-01',
+        arrive_date: '2026-06-08',
+      },
+    ])
+    const uk = countDaysInCountry(
+      'simon',
+      'United Kingdom',
+      { type: 'custom', start: '2026-06-03', end: '2026-06-04' },
+      trips,
+    )
+    expect(uk.days_present).toBe(2)
+  })
+
+  it('countDays: uk_tax_year with no trip rows (seed UK for full tax year window)', () => {
+    const r = countDaysInCountry('simon', 'United Kingdom', { type: 'uk_tax_year', year: 2026 }, simon([]))
+    expect(r.method).toBe('uk_midnight')
+    expect(r.range_start).toBe('2026-04-06')
+    expect(r.range_end).toBe('2027-04-05')
+    expect(r.days_present).toBe(365)
   })
 
   it('chiara trips do not affect simon counts', () => {

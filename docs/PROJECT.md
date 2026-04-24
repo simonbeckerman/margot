@@ -79,8 +79,9 @@ These are **not** Supabase dashboard passwords. They are **household API tokens*
 
    - `COMPANION_TOKEN_SIMON` → first secret
    - `COMPANION_TOKEN_CHIARA` → second secret
+   - `MCP_OAUTH_JWT_SECRET` → third secret (Claude OAuth token signing; see [CONNECT.md](CONNECT.md))
 
-3. The function maps `Authorization: Bearer <token>` to `simon` or `chiara`. Same function URL for both; different bearer token per person.
+3. **Claude (Add custom connector):** uses MCP OAuth access tokens after the in-browser **Connect** flow; the login page accepts the same per-person **companion** secrets stored in `COMPANION_TOKEN_*`. **Cursor / API scripts** can still send `Authorization: Bearer <companion token>`, **Basic** (secret = token), or `?companion_token=`. See [CONNECT.md §7](CONNECT.md#7-claude--add-custom-connector-screen) and [claude.com/docs/connectors/building/authentication](https://claude.com/docs/connectors/building/authentication).
 
 **Rotation:** create a new secret, update the Edge Function secret and each client (Claude connector), deploy if required, then stop using the old secret.
 
@@ -94,7 +95,7 @@ These are **not** Supabase dashboard passwords. They are **household API tokens*
 
 **MCP** is how Claude (or Cursor) talks to a server that exposes tools. A **remote** household connector uses MCP over **HTTP** (exact transport depends on client and SDK). A Supabase Edge Function is a reasonable host for that endpoint.
 
-**Claude:** configure a custom MCP or connector to your deployed function URL, with the bearer token for Simon or Chiara.
+**Claude:** the custom connector URL is the function base URL; **do not** put the household token in **OAuth Client Secret** (that field is for confidential OAuth clients only). Use **Connect** in the UI and enter the access code on this project’s sign-in page; [docs/CONNECT.md](CONNECT.md) §7. File-based / Cursor config can still use `Authorization: Bearer` with the companion token.
 
 **Custom GPT:** OpenAI Custom GPTs do **not** use MCP. They usually call **HTTPS REST** endpoints (Actions / OpenAPI). Keep **core logic** (day counting, database access) in shared TypeScript modules, and add a thin REST layer beside MCP later if you want the same rules in a GPT without duplicating logic.
 
