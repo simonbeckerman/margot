@@ -1,35 +1,45 @@
-# Beckerman Companion — project handbook
+# Beckerman Companion: project handbook
 
-This file is the long-lived record of how this repo is meant to work. The product and technical specification is [SPEC.md](SPEC.md).
+Long-lived operations and setup. Product and technical detail is in [SPEC.md](SPEC.md).
 
 ## CLI vs MCP (what to install)
 
-**CLI** means a **command-line program** you run in Terminal (for example `supabase login`, `supabase db push`). It is the standard way to attach this repo to a real Supabase project, run migrations, deploy Edge Functions, and manage deployment secrets.
+**CLI** is a **command-line program** you run in Terminal (for example `supabase login`, `supabase db push`). It is how you link this repo to a Supabase project, run migrations, deploy Edge Functions, and manage deployment secrets.
 
-**MCP** means **Model Context Protocol**: a way for **Cursor** (or another MCP client) to connect to a remote **MCP server** so assistant tools can talk to a service. Supabase offers a hosted MCP URL you add under Cursor **Settings → Tools & MCP**. That helps while building; it does **not** replace the CLI for migrations and deploys.
+**MCP** is **Model Context Protocol**: a way for **Cursor** (or another client) to connect to a remote MCP server so assistant tools can use a service. Supabase provides a hosted MCP URL in **Cursor Settings → Tools & MCP**. That helps while building. It does **not** replace the CLI for migrations and deploys.
 
-**Best practice here:** install and use **both**. If you must prioritize one to ship the product, install the **Supabase CLI** first, then add the **Supabase MCP** in Cursor.
+**Best practice here:** install and use **both**. If you must pick one to ship the product first, install the **Supabase CLI**, then add **Supabase MCP** in Cursor.
 
 ## Quick start (do once)
 
 On your Mac:
 
-1. **GitHub:** Run `gh auth login` in Terminal, then from this repo run `gh repo create beckerman-companion --private --source=. --remote=origin --push` (change name or use `--public` if you want).
-2. **Supabase CLI:** Run `supabase login` in Terminal.
-3. **Supabase in Cursor:** Cursor **Settings → Tools & MCP → Add MCP server** → type **HTTP** → URL `https://mcp.supabase.com/mcp` → finish login when asked. [Supabase MCP docs](https://supabase.com/docs/guides/getting-started/mcp).
-4. **Household API tokens (when the Edge Function exists):** Two long random secrets (not your Supabase password), in a password manager; set as function secrets and in each Claude connector. See the **API tokens** section below.
-5. **Country names:** Store full English names (e.g. `United Kingdom`); code may normalize UK short forms.
+1. **GitHub:** `gh auth login`, then from this repo: `gh repo create beckerman-companion --private --source=. --remote=origin --push` (change name or use `--public` if you want).
+2. **Supabase CLI:** `supabase login`.
+3. **Supabase MCP in Cursor:** **Settings → Tools & MCP → Add MCP server** → type **HTTP** → URL `https://mcp.supabase.com/mcp` → complete login when prompted. Details: [Supabase MCP](https://supabase.com/docs/guides/getting-started/mcp).
+4. **Household API tokens** (once the Edge Function exists): two long random secrets in a password manager; set as function secrets and in each Claude connector. See [API tokens](#api-tokens-simon-and-chiara) below.
+5. **Country names:** full English names in the database (for example `United Kingdom`); code may normalize UK short forms. See [Country strings](#country-strings).
 
-## Local CLIs (this machine)
+## Installing GitHub and Supabase CLIs
 
-These were installed with Homebrew for repo work and automation:
+If `gh` or `supabase` are missing, install with Homebrew:
 
-- **GitHub CLI:** `gh` (`brew install gh`). Check: `gh --version`. First-time use: run `gh auth login` and complete the browser/device flow (interactive; cannot be finished for you by an agent).
-- **Supabase CLI:** `supabase` (`brew install supabase/tap/supabase`). Check: `supabase --version`. Link a project after `supabase login` (opens browser).
+```bash
+brew install gh
+brew install supabase/tap/supabase
+```
 
-**Supabase MCP (Cursor)** is separate from the CLI: it is an HTTP connection inside **Cursor Settings → Tools & MCP**, not a Homebrew package. Add server type **HTTP** and URL `https://mcp.supabase.com/mcp`, then sign in when Cursor prompts. Official guide: [Model context protocol (MCP)](https://supabase.com/docs/guides/getting-started/mcp).
+Check versions with `gh --version` and `supabase --version`. First-time GitHub use: `gh auth login` (browser or device flow). Supabase: `supabase login` opens a browser.
 
-Example fragment for clients that use a JSON `mcpServers` map (field names depend on your Cursor version; use the Settings UI if unsure):
+## Supabase MCP in Cursor (detail)
+
+1. **Cursor Settings → Tools & MCP → Add MCP server** (labels may vary by version).
+2. Server type **HTTP**, URL `https://mcp.supabase.com/mcp`.
+3. Sign in to Supabase and choose the **organization** that should own the project.
+
+Optional: restrict to one project with query parameters from the [Supabase MCP](https://supabase.com/docs/guides/getting-started/mcp) docs (for example `?project_ref=YOUR_REF`).
+
+Example config shape for clients that use an `mcpServers` map (field names depend on your Cursor version; prefer the Settings UI when unsure):
 
 ```json
 {
@@ -42,63 +52,49 @@ Example fragment for clients that use a JSON `mcpServers` map (field names depen
 }
 ```
 
-## Do I (the AI) have access to your Supabase?
+## Access to Supabase from this repo
 
-**Not by default.** Nothing in this folder grants access to your Supabase account. Access happens only if:
+This repository does **not** contain Supabase credentials. Someone can work with your Supabase project only if:
 
-- You add the **hosted Supabase MCP** in Cursor and sign in with your Supabase account (recommended for provisioning and SQL from chat), or
-- You put **project URL and service role / anon keys** in local env files or CI secrets for CLI and deploys.
+- **Hosted Supabase MCP** is enabled in Cursor with your account, or
+- **Project URL and keys** (for example service role or anon, as appropriate) exist in local env files or CI secrets for CLI and deploys.
 
-I cannot log into Supabase as you. I can edit this repo, run local commands, and use MCP tools **you** have enabled in Cursor.
+Signing in to Supabase in a browser is always done in your own session. After MCP is connected, Cursor can expose Supabase MCP tools to assistants according to your client settings.
 
-## Supabase MCP — install it yourself (one-time)
+## API tokens (Simon and Chiara)
 
-Supabase hosts an MCP endpoint; you connect Cursor to it and complete browser login.
+These are **not** Supabase dashboard passwords. They are **household API tokens** the Edge Function checks on MCP requests so the server knows whether the caller is Simon or Chiara.
 
-1. Open **Cursor Settings → Tools & MCP → Add MCP Server** (wording may vary slightly by version).
-2. Add an HTTP MCP server with URL: `https://mcp.supabase.com/mcp`
-3. When prompted, sign in to Supabase and pick the **organization** that should own the project.
-
-Optional: scope to one project by appending query params documented in [Supabase MCP](https://supabase.com/docs/guides/getting-started/mcp) (for example `?project_ref=YOUR_REF`).
-
-**I cannot click through that login for you.** After it is connected, agents in Cursor can use Supabase MCP tools if your client exposes them.
-
-## API tokens (Simon vs Chiara) — recommended approach
-
-These are **not** your Supabase keys. They are **household API tokens** the Edge Function checks on every MCP request so we know whether the caller is Simon or Chiara.
-
-**Recommendation:**
-
-1. Generate two long random secrets (32+ bytes), one per person. Example on macOS:
+1. Generate two long random secrets (32+ bytes), one per person. On macOS:
 
    ```bash
    openssl rand -base64 32
    ```
 
-   Run it twice; store the outputs in a password manager. Do not commit them.
+   Run twice; store values in a password manager. Do not commit them.
 
-2. In Supabase, set **Edge Function secrets** (Dashboard → Project Settings → Edge Functions, or CLI secrets), for example:
+2. In Supabase, set **Edge Function secrets** (Dashboard → Project Settings → Edge Functions, or CLI), for example:
 
    - `COMPANION_TOKEN_SIMON` → first secret
    - `COMPANION_TOKEN_CHIARA` → second secret
 
-3. The function maps incoming `Authorization: Bearer <token>` to `simon` or `chiara`. Same URL for both of you; different bearer token per person.
+3. The function maps `Authorization: Bearer <token>` to `simon` or `chiara`. Same function URL for both; different bearer token per person.
 
-**Rotation:** generate a new secret, update the Edge Function secret, update each client config (Claude connector), deploy if needed, then retire the old secret.
+**Rotation:** create a new secret, update the Edge Function secret and each client (Claude connector), deploy if required, then stop using the old secret.
 
-## Country strings — convention for this project
+## Country strings
 
-- **Storage:** Use **full English country names** in the database (example: `United Kingdom`), matching [SPEC.md](SPEC.md).
-- **Input normalization:** Accept common aliases for the UK and normalize to `United Kingdom` before queries and inserts: `UK`, `U.K.`, `GB`, `Great Britain` (case-insensitive, trimmed). Other countries: trim; optional future map for `USA` / `US` → `United States` if you want consistency.
-- **Matching in `days_in_country`:** After normalization, compare with the same canonical string used for presence logic and trip rows.
+- **Storage:** full English country names in the database (example: `United Kingdom`), as in [SPEC.md](SPEC.md).
+- **Input normalization:** accept common UK aliases and normalize to `United Kingdom`: `UK`, `U.K.`, `GB`, `Great Britain` (case-insensitive, trimmed). Other countries: trim; optional later map such as `USA` / `US` → `United States`.
+- **`days_in_country`:** after normalization, compare using the same canonical string as in trip rows and presence logic.
 
-## MCP “transport” and Claude vs Custom GPT
+## MCP transport, Claude, and Custom GPT
 
-**MCP** is a protocol: how Claude (or Cursor) talks to a server that exposes tools. For a **remote** connector, the server must speak MCP over **HTTP** (often Streamable HTTP / SSE, depending on client and SDK version). A Supabase Edge Function is a good place to host that HTTP endpoint.
+**MCP** is how Claude (or Cursor) talks to a server that exposes tools. A **remote** household connector uses MCP over **HTTP** (exact transport depends on client and SDK). A Supabase Edge Function is a reasonable host for that endpoint.
 
-**Claude:** You add a custom MCP / connector pointing at your deployed function URL, with the bearer token for Simon or Chiara.
+**Claude:** configure a custom MCP or connector to your deployed function URL, with the bearer token for Simon or Chiara.
 
-**Custom GPT:** OpenAI’s Custom GPTs do **not** run MCP. They typically call **plain HTTPS REST** endpoints you define (Actions / OpenAPI). **Plan:** keep the **core logic** (day counting, DB access) in shared TypeScript modules, and add a thin REST layer alongside the MCP layer later so the same rules power a GPT without duplicating business logic.
+**Custom GPT:** OpenAI Custom GPTs do **not** use MCP. They usually call **HTTPS REST** endpoints (Actions / OpenAPI). Keep **core logic** (day counting, database access) in shared TypeScript modules, and add a thin REST layer beside MCP later if you want the same rules in a GPT without duplicating logic.
 
 ## GitHub repository
 
@@ -109,9 +105,9 @@ cd /Users/simon/GitHub/beckerman-companion
 gh repo create beckerman-companion --private --source=. --remote=origin --push
 ```
 
-Adjust visibility (`--public`) or name as you like. If the remote already exists, use `git remote add origin ...` and `git push -u origin main` instead.
+Adjust visibility or name as needed. If `origin` already exists, use `git remote add origin ...` and `git push -u origin main`.
 
-**Without `gh`:** on GitHub use **New repository** (no README), then:
+**Without `gh`:** create an empty repository on GitHub (no README), then:
 
 ```bash
 cd /Users/simon/GitHub/beckerman-companion
@@ -121,9 +117,9 @@ git push -u origin main
 
 ## Governing documents
 
-When you add them, place:
+Add when available:
 
 - `docs/israel_move_source_of_truth.md`
 - `docs/israel_move_year_one_priorities.md`
 
-They are referenced from [SPEC.md](SPEC.md), `README.md`, and `.cursorrc`.
+They are referenced from [SPEC.md](SPEC.md), [README.md](../README.md), and `.cursorrc`.

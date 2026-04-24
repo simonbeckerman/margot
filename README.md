@@ -4,8 +4,10 @@ Household tool for Simon and Chiara: **travel-day tracking** for UK Statutory Re
 
 ## Documentation
 
+Detail lives in `docs/`; this file stays a short index and operations checklist.
+
 | Document | Purpose |
-| -------- | ------- |
+| ---------- | ------- |
 | [docs/SPEC.md](docs/SPEC.md) | Product and technical specification: schema, tools, counting rules, deliverables |
 | [docs/PROJECT.md](docs/PROJECT.md) | Setup: GitHub, Supabase CLI and MCP, tokens, country strings, Git remote |
 | [docs/israel_move_source_of_truth.md](docs/israel_move_source_of_truth.md) | Factual basis (add when available) |

@@ -1,4 +1,4 @@
-# Beckerman Companion — product and technical specification
+# Beckerman Companion: product and technical specification
 
 Personal travel-day tracking via an MCP server. First feature of `beckerman-companion`: a two-person household tool for Simon Beckerman and Chiara, relocating from the UK to Israel, tracking UK days to reduce risk of accidental UK tax residence under the Statutory Residence Test. Later: advisor-answer memory, decision tracking, document grounding. **This phase is only travel days.**
 
@@ -9,7 +9,7 @@ Personal travel-day tracking via an MCP server. First feature of `beckerman-comp
 - TypeScript throughout.
 - Use the official MCP SDK.
 
-Provisioning and tooling (CLI, MCP in Cursor, GitHub) are described in `docs/PROJECT.md`.
+Provisioning and tooling (CLI, MCP in Cursor, GitHub) are in [PROJECT.md](PROJECT.md).
 
 ## Database
 
@@ -34,7 +34,7 @@ Add an index on `(person, depart_date)`. Enable RLS; both users can read and wri
 
 Two bearer tokens, one for Simon and one for Chiara. The MCP server reads the token on every call and sets `current_user` to `simon` or `chiara`. Store the mapping in Supabase (table or env vars), whichever stays simpler to operate.
 
-`log_trip` defaults `person` to `current_user` if omitted, but allows override (e.g. Simon logs for Chiara). Always set `created_by` to `current_user`.
+`log_trip` defaults `person` to `current_user` if omitted, but allows override (for example Simon logs for Chiara). Always set `created_by` to `current_user`.
 
 ## MCP tools
 
@@ -100,7 +100,7 @@ Unit-test the counting function at least for:
 - Several trips in one year.
 - Range before any trips (seed country).
 
-Country naming and normalization for implementation: see `docs/PROJECT.md` (country strings).
+Country naming and normalization: [PROJECT.md](PROJECT.md) (country strings).
 
 ## Out of scope (this build)
 
@@ -130,6 +130,6 @@ When present in `docs/`:
 
 ## Implementation style
 
-- No em dashes in code comments or `README.md`.
+- No em dashes in code comments, [README.md](../README.md), or other markdown under `docs/`. Use a colon, hyphen, or sentence break instead.
 - Comments are sparse; explain why, not what.
 - Counting logic should favour clarity over cleverness; it will be read often.
