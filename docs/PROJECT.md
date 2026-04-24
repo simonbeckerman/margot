@@ -2,6 +2,28 @@
 
 This file is the long-lived record of how this repo is meant to work. The implementation spec lives in `start.md` at the repo root.
 
+## Local CLIs (this machine)
+
+These were installed with Homebrew for repo work and automation:
+
+- **GitHub CLI:** `gh` (`brew install gh`). Check: `gh --version`. First-time use: run `gh auth login` and complete the browser/device flow (interactive; cannot be finished for you by an agent).
+- **Supabase CLI:** `supabase` (`brew install supabase/tap/supabase`). Check: `supabase --version`. Link a project after `supabase login` (opens browser).
+
+**Supabase MCP (Cursor)** is separate from the CLI: it is an HTTP connection inside **Cursor Settings → Tools & MCP**, not a Homebrew package. Add server type **HTTP** and URL `https://mcp.supabase.com/mcp`, then sign in when Cursor prompts. Official guide: [Model context protocol (MCP)](https://supabase.com/docs/guides/getting-started/mcp).
+
+Example fragment for clients that use a JSON `mcpServers` map (field names depend on your Cursor version; use the Settings UI if unsure):
+
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp"
+    }
+  }
+}
+```
+
 ## Do I (the AI) have access to your Supabase?
 
 **Not by default.** Nothing in this folder grants access to your Supabase account. Access happens only if:
@@ -62,17 +84,22 @@ These are **not** your Supabase keys. They are **household API tokens** the Edge
 
 ## GitHub repository
 
-If `gh` is not installed, create the repo in the browser:
+**With `gh` (after `gh auth login`):** from the repo root:
 
-1. On GitHub: **New repository**, name e.g. `beckerman-companion`, private if you prefer, **do not** add README (this folder already has content).
-2. Locally:
+```bash
+cd /Users/simon/GitHub/beckerman-companion
+gh repo create beckerman-companion --private --source=. --remote=origin --push
+```
 
-   ```bash
-   cd /path/to/beckerman-companion
-   git remote add origin https://github.com/YOUR_USER/beckerman-companion.git
-   git branch -M main
-   git push -u origin main
-   ```
+Adjust visibility (`--public`) or name as you like. If the remote already exists, use `git remote add origin ...` and `git push -u origin main` instead.
+
+**Without `gh`:** on GitHub use **New repository** (no README), then:
+
+```bash
+cd /Users/simon/GitHub/beckerman-companion
+git remote add origin https://github.com/YOUR_USER/beckerman-companion.git
+git push -u origin main
+```
 
 ## Governing documents
 
