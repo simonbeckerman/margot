@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "smoke": "npm test && node scripts/smoke-mcp.mjs"
   },
   "devDependencies": {
     "typescript": "~5.7.0",

@@ -44,6 +44,21 @@ npm install
 npm test
 ```
 
+**Smoke test** (unit tests + 401 on the live function; optional `log_trip` with a token):
+
+```bash
+npm run smoke
+```
+
+To also call the deployed MCP with **`log_trip`** (inserts a year-2030 test trip tagged for deletion), set your token once in the same shell, then run smoke:
+
+```bash
+export COMPANION_TOKEN_SIMON='paste-from-password-manager'
+npm run smoke
+```
+
+Remove test rows: `delete from public.trips where notes like '%smoke test%';` in the Supabase SQL editor.
+
 ### Redeploy the MCP Edge Function
 
 ```bash
