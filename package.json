@@ -5,7 +5,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "smoke": "npm test && node scripts/smoke-mcp.mjs"
+    "smoke": "npm test && node scripts/smoke-mcp.mjs",
+    "e2e": "node scripts/e2e-full.mjs"
   },
   "devDependencies": {
     "typescript": "~5.7.0",

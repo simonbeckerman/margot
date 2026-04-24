@@ -59,6 +59,14 @@ npm run smoke
 
 Remove test rows: `delete from public.trips where notes like '%smoke test%';` in the Supabase SQL editor.
 
+**Full E2E** (unit tests, rotates both companion tokens, live `log_trip` + `days_in_country`, then deletes all rows with notes like `e2e%`):
+
+```bash
+npm run e2e
+```
+
+The script prints **new** `COMPANION_TOKEN_SIMON` and `COMPANION_TOKEN_CHIARA`. Save them; your previous tokens stop working after the run.
+
 ### Redeploy the MCP Edge Function
 
 ```bash
