@@ -17,8 +17,9 @@ Do **not** narrow the plan because of unknown limits on what an agent can run or
 
 ## Source of truth
 
-- Build spec: `start.md`
-- Project decisions, ops, and tooling (CLI vs MCP, installs): `docs/PROJECT.md`
+- Product and technical specification: `docs/SPEC.md`
+- Project handbook (setup, ops, tooling): `docs/PROJECT.md`
+- Repository overview and operations index: `README.md`
 - When present, read `docs/israel_move_source_of_truth.md` and `docs/israel_move_year_one_priorities.md` before large changes.
 
 ## Technical constraints
@@ -36,4 +37,6 @@ Do **not** narrow the plan because of unknown limits on what an agent can run or
 ## Rules vs docs
 
 - **This file:** scope, stack, style, out-of-scope items, and the decision principle.
+- **`docs/SPEC.md`:** schema, MCP tools, counting logic, deliverables.
 - **`docs/PROJECT.md`:** setup, installs, CLI vs MCP, tokens, GitHub, and other operations.
+- **`README.md`:** entry point and operations index for humans.

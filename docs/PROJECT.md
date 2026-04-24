@@ -1,6 +1,6 @@
 # Beckerman Companion — project handbook
 
-This file is the long-lived record of how this repo is meant to work. The implementation spec lives in `start.md` at the repo root.
+This file is the long-lived record of how this repo is meant to work. The product and technical specification is [SPEC.md](SPEC.md).
 
 ## CLI vs MCP (what to install)
 
@@ -88,7 +88,7 @@ These are **not** your Supabase keys. They are **household API tokens** the Edge
 
 ## Country strings — convention for this project
 
-- **Storage:** Use **full English country names** in the database (example: `United Kingdom`), matching `start.md`.
+- **Storage:** Use **full English country names** in the database (example: `United Kingdom`), matching [SPEC.md](SPEC.md).
 - **Input normalization:** Accept common aliases for the UK and normalize to `United Kingdom` before queries and inserts: `UK`, `U.K.`, `GB`, `Great Britain` (case-insensitive, trimmed). Other countries: trim; optional future map for `USA` / `US` → `United States` if you want consistency.
 - **Matching in `days_in_country`:** After normalization, compare with the same canonical string used for presence logic and trip rows.
 
@@ -126,4 +126,4 @@ When you add them, place:
 - `docs/israel_move_source_of_truth.md`
 - `docs/israel_move_year_one_priorities.md`
 
-They are referenced from `start.md` and `.cursorrc`.
+They are referenced from [SPEC.md](SPEC.md), `README.md`, and `.cursorrc`.
