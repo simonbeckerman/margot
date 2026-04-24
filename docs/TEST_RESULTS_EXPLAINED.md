@@ -11,13 +11,32 @@ The app has two main jobs:
 
 **Tests** make sure the day-counting logic and the **live** server (the thing Claude talks to) behave as we expect, without you having to click around in Claude to find bugs.
 
-## The three test commands
+## First: what do “npm test” and “npm run smoke” even mean?
+
+You do not need to remember the letters **npm** for daily life. Think of it like this:
+
+- **npm** is a small program that came with the project when we set it up. Its job is to run **named recipes** that live in a file in the repo (called `package.json`). You only use it when you want to run one of those recipes.
+- **`npm test`** means: “Hey npm, run the recipe named **test**.” In our project, that recipe means: “Run the **vitest** checker on the day-counting code.” So **`npm test` = “check the day-counting math on my computer, using fake example trips, with no database and no internet.”** It is the gentlest test. It does **not** talk to Supabase or Claude.
+- **`npm run smoke`** means: “Hey npm, run the recipe named **smoke**.” The word **smoke** is just a name we gave that recipe. In our project, **smoke** means: “Run the same day-counting check as `npm test`, then **ping** the real server on the internet to see if it answers, and (only if you put a key in the terminal) try one real **log trip** request.” A **“smoke test”** in software is a quick “is the engine on fire or does it look alive?” check. It is not the full end-to-end story.
+- **`npm run e2e`** means: “Run the recipe named **e2e**” (**e2e** = end to end). That one does the full story (see below), including changing keys and cleaning up test data.
+
+**One-line summary**
+
+| You type        | In plain English |
+| --------------- | ---------------- |
+| `npm test`      | Check the **math** for counting days, on your machine only. |
+| `npm run smoke` | Check the math, then a **light** check that the **live** server is there (and a bit more if you set a key). |
+| `npm run e2e`   | **Full** check on the real system, then delete the fake trips; **new keys** are printed (save them). |
+
+## The three test commands (same info as a table)
 
 | Command | What it checks | Needs internet? | Needs a secret token? |
 | ------- | -------------- | --------------- | ---------------------- |
 | `npm test` | The **math** for counting days, using made-up data in the code. | No | No |
 | `npm run smoke` | The **live** function says “no” if you do not pass a key, and runs **unit tests** first. | Yes | Only if you want a real `log_trip` call (optional) |
 | `npm run e2e` | A **full** check: unit tests, then real calls to the live server, then **deleting** the pretend trips we inserted. | Yes | The script **creates new** keys for the run (see below) |
+
+If the table feels easier, use it. If the section above feels easier, use that. They describe the same three recipes.
 
 ## What a good `npm test` result looks like
 
