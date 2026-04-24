@@ -9,7 +9,11 @@ Household tool for Simon and Chiara. Current scope is travel-day tracking for UK
 
 ## Decision principle
 
-Choose what is **best for the product and long-term maintenance**: correct behavior, clear operations, and a normal professional workflow. Do **not** narrow the plan because of unknown limits on what an agent can run or click in a given session. After the right approach is chosen, solve login, installs, and steps with the user.
+Choose what is **best for the product and long-term maintenance**: correct behavior, clear operations, and a normal professional workflow. That includes **integrations and connections** (GitHub, Supabase, MCP, CLIs, and anything similar you add later).
+
+Do **not** replace the best approach with a weaker shortcut just because an agent cannot finish every step alone (for example browser login, OAuth, or pasting a token). Do **not** steer away from the method the user asked for when that method is the right one. Say clearly what must happen on the user’s side, then keep the plan aligned with best practice.
+
+Do **not** narrow the plan because of unknown limits on what an agent can run or click in a given session. After the right approach is chosen, work through installs, credentials, and steps with the user.
 
 ## Source of truth
 
