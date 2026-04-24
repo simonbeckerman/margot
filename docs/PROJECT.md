@@ -2,9 +2,17 @@
 
 This file is the long-lived record of how this repo is meant to work. The implementation spec lives in `start.md` at the repo root.
 
+## CLI vs MCP (what to install)
+
+**CLI** means a **command-line program** you run in Terminal (for example `supabase login`, `supabase db push`). It is the standard way to attach this repo to a real Supabase project, run migrations, deploy Edge Functions, and manage deployment secrets.
+
+**MCP** means **Model Context Protocol**: a way for **Cursor** (or another MCP client) to connect to a remote **MCP server** so assistant tools can talk to a service. Supabase offers a hosted MCP URL you add under Cursor **Settings → Tools & MCP**. That helps while building; it does **not** replace the CLI for migrations and deploys.
+
+**Best practice here:** install and use **both**. If you must prioritize one to ship the product, install the **Supabase CLI** first, then add the **Supabase MCP** in Cursor.
+
 ## Quick start (do once)
 
-The AI cannot sign into your accounts for you. On your Mac:
+On your Mac:
 
 1. **GitHub:** Run `gh auth login` in Terminal, then from this repo run `gh repo create beckerman-companion --private --source=. --remote=origin --push` (change name or use `--public` if you want).
 2. **Supabase CLI:** Run `supabase login` in Terminal.

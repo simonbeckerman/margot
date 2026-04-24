@@ -7,6 +7,19 @@ alwaysApply: true
 
 Household tool for Simon and Chiara. Current scope is travel-day tracking for UK Statutory Residence Test day counts only.
 
+## Decision principle
+
+Choose what is **best for the product and long-term maintenance**: correct behavior, clear operations, and a normal professional workflow. Do **not** narrow the plan because of unknown limits on what an agent can run or click in a given session. After the right approach is chosen, solve login, installs, and steps with the user.
+
+## CLI vs MCP (Supabase, this repo)
+
+These are different layers; the best setup uses **both**.
+
+- **Supabase CLI:** A program you run in a terminal (`supabase ...`). It is how you link the repo to a project, apply migrations, deploy Edge Functions, and manage secrets for real infrastructure. For **shipping and operating** this codebase, the CLI is the foundation.
+- **Supabase MCP (in Cursor):** A **Model Context Protocol** connection from Cursor to Supabase’s hosted MCP endpoint. It lets tools in the editor talk to your Supabase account (schema, docs, and similar). It **does not** replace the CLI for migrations and deploys.
+
+If someone could only install one thing to **build and run this project**, pick the **CLI**. Add **MCP in Cursor** on top for the best day-to-day workflow when using AI in the editor.
+
 ## Source of truth
 
 - Build spec: `start.md`
