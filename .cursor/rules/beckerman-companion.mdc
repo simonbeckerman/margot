@@ -1,0 +1,26 @@
+---
+description: Beckerman Companion project conventions and scope
+alwaysApply: true
+---
+
+# Beckerman Companion
+
+Household tool for Simon and Chiara. Current scope is travel-day tracking for UK Statutory Residence Test day counts only.
+
+## Source of truth
+
+- Build spec: `start.md`
+- Project decisions and ops: `docs/PROJECT.md`
+- When present, read `docs/israel_move_source_of_truth.md` and `docs/israel_move_year_one_priorities.md` before large changes.
+
+## Technical constraints
+
+- Supabase for database and hosting; MCP server deploys as a Supabase Edge Function (not Vercel).
+- TypeScript throughout; use the official MCP SDK.
+- Out of scope unless explicitly requested: advisor memory, vectors, web UI, deeming-day logic, email ingestion. Use TODO comments instead of building.
+
+## Style
+
+- No em dashes in code comments or README.
+- Sparse comments; explain why, not what.
+- Counting logic for `days_in_country` must stay clear and well tested.

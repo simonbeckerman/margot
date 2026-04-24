@@ -1,0 +1,8 @@
+# Beckerman Companion — Cursor project context
+#
+# Read first: start.md (build spec), docs/PROJECT.md (decisions and how we work).
+# Governing docs (when present): docs/israel_move_source_of_truth.md,
+# docs/israel_move_year_one_priorities.md
+#
+# Stack: TypeScript, Supabase (DB + Edge Functions), official MCP SDK.
+# No em dashes in comments or README. Prefer small, reversible changes.
