@@ -29,6 +29,10 @@ Do **not** narrow the plan because of unknown limits on what an agent can run or
 - TypeScript throughout; use the official MCP SDK.
 - Out of scope unless explicitly requested: advisor memory, vectors, web UI, deeming-day logic, email ingestion. Use TODO comments instead of building.
 
+## Git workflow
+
+When the user asks to **commit**, **push**, or **commit and push** (or similar), run `git` in this repo yourself: stage sensible paths, commit with a clear message, and push to `origin` when they asked for push. Do not hand the user a list of git commands unless a push fails (for example missing `origin`, or auth). If auth failed once, tell them the one-time fix, then keep using this workflow afterward.
+
 ## Style
 
 - No em dashes in code comments, `README.md`, or markdown under `docs/`. Use a colon, hyphen, or sentence break instead.
