@@ -25,11 +25,19 @@ supabase login
 
 Create a project named **beckerman-companion** in the [Supabase Dashboard](https://supabase.com/dashboard) if you do not have one yet. Copy the **project ref** (short id in the project URL).
 
-Link this repo to the project:
+Link this repo to the project (include the **database password** you chose when creating the project so the CLI can use the **IPv4 pooler** on networks without IPv6):
 
 ```bash
 cd /path/to/beckerman-companion
-supabase link --project-ref YOUR_PROJECT_REF
+supabase link --project-ref YOUR_PROJECT_REF -p 'YOUR_DATABASE_PASSWORD'
+```
+
+If you already ran `supabase link` without `-p` and `supabase db push` fails with an **IPv6** error, run `supabase link` again with `-p` as above, then `supabase db push`.
+
+You can also create a new project from the CLI (optional):
+
+```bash
+supabase projects create beckerman-companion --org-id YOUR_ORG_ID --db-password 'YOUR_DATABASE_PASSWORD' --region eu-west-2
 ```
 
 ## 3. Database migrations
