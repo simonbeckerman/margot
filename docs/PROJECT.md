@@ -2,6 +2,16 @@
 
 This file is the long-lived record of how this repo is meant to work. The implementation spec lives in `start.md` at the repo root.
 
+## Quick start (do once)
+
+The AI cannot sign into your accounts for you. On your Mac:
+
+1. **GitHub:** Run `gh auth login` in Terminal, then from this repo run `gh repo create beckerman-companion --private --source=. --remote=origin --push` (change name or use `--public` if you want).
+2. **Supabase CLI:** Run `supabase login` in Terminal.
+3. **Supabase in Cursor:** Cursor **Settings → Tools & MCP → Add MCP server** → type **HTTP** → URL `https://mcp.supabase.com/mcp` → finish login when asked. [Supabase MCP docs](https://supabase.com/docs/guides/getting-started/mcp).
+4. **Household API tokens (when the Edge Function exists):** Two long random secrets (not your Supabase password), in a password manager; set as function secrets and in each Claude connector. See the **API tokens** section below.
+5. **Country names:** Store full English names (e.g. `United Kingdom`); code may normalize UK short forms.
+
 ## Local CLIs (this machine)
 
 These were installed with Homebrew for repo work and automation:

@@ -25,27 +25,7 @@ Household tool for Simon and Chiara. Current scope is travel-day tracking for UK
 - Sparse comments; explain why, not what.
 - Counting logic for `days_in_country` must stay clear and well tested.
 
-## Simple setup (for humans, not experts)
+## Rules vs docs
 
-The AI cannot open your Supabase or GitHub accounts by itself. You run a few commands once on your Mac; after that the AI can help with code in this folder.
-
-**1. GitHub (share and back up the code)**  
-Tools: `gh` is installed via Homebrew (`/opt/homebrew/bin/gh`). In Terminal:
-
-1. `gh auth login` and finish the steps in the browser.
-2. From this repo folder: `gh repo create beckerman-companion --private --source=. --remote=origin --push`  
-   Change the name or use `--public` if you prefer.
-
-**2. Supabase (database and hosting)**  
-Tools: `supabase` CLI is installed via Homebrew. In Terminal: `supabase login` and sign in in the browser when asked.
-
-**3. Supabase in Cursor (so the AI can help with your project)**  
-This is not installed with Homebrew. In Cursor: **Settings → Tools & MCP → Add MCP server**. Type: **HTTP**. URL: `https://mcp.supabase.com/mcp`. Complete login when Cursor asks. Optional detail: [Supabase MCP docs](https://supabase.com/docs/guides/getting-started/mcp).
-
-**4. Household API tokens (later, for Claude)**  
-Simon and Chiara each get a long random secret (not your Supabase password). Store them in a password manager. They go in Supabase Edge Function secrets and in each person’s Claude connector. Full notes live in `docs/PROJECT.md` when you need them.
-
-**5. Country names**  
-Use full English names in the database (example: `United Kingdom`). The app may accept short forms like UK or GB and turn them into `United Kingdom`.
-
-When helping the user, prefer short checklists and avoid protocol jargon unless they ask. Point to `start.md` for the product spec and `docs/PROJECT.md` for longer operational detail.
+- Keep this file limited to **how to implement and maintain the codebase** (scope, stack, style, out-of-scope items).
+- Put **account setup, MCP install steps, and CLI how-tos** in `docs/PROJECT.md`, not here.
