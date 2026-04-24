@@ -7,6 +7,10 @@ alwaysApply: true
 
 Household tool for Simon and Chiara. Current scope is travel-day tracking for UK Statutory Residence Test day counts only.
 
+## Audience
+
+The owner is **not** assumed to be a software expert. Use **plain language**, **short steps**, and avoid jargon unless it helps. If you use a technical term, add a **one-line plain explanation** when it helps. Favour what they can do next over theory. Lay-oriented explanations of tests and output live in `docs/TEST_RESULTS_EXPLAINED.md`.
+
 ## Decision principle
 
 Choose what is **best for the product and long-term maintenance**: correct behavior, clear operations, and a normal professional workflow. That includes **integrations and connections** (GitHub, Supabase, MCP, CLIs, and anything similar you add later).
@@ -21,6 +25,7 @@ Do **not** narrow the plan because of unknown limits on what an agent can run or
 - Project handbook (setup, ops, tooling): `docs/PROJECT.md`
 - Connect GitHub, Supabase, deploy, Claude: `docs/CONNECT.md`
 - Repository overview and operations index: `README.md`
+- Non-expert guide to what tests mean: `docs/TEST_RESULTS_EXPLAINED.md`
 - When present, read `docs/israel_move_source_of_truth.md` and `docs/israel_move_year_one_priorities.md` before large changes.
 
 ## Technical constraints
@@ -44,4 +49,5 @@ When the user asks to **commit**, **push**, or **commit and push** (or similar),
 - **This file:** scope, stack, style, out-of-scope items, and the decision principle.
 - **`docs/SPEC.md`:** schema, MCP tools, counting logic, deliverables.
 - **`docs/PROJECT.md`:** setup, installs, CLI vs MCP, tokens, GitHub, and other operations.
+- **`docs/TEST_RESULTS_EXPLAINED.md`:** tests and output in plain language (see **Audience** above).
 - **`README.md`:** entry point and operations index for humans.

@@ -9,6 +9,7 @@ Detail lives in `docs/`; this file is the short index and day-to-day checklist.
 | Document | Purpose |
 | ---------- | ------- |
 | [docs/CONNECT.md](docs/CONNECT.md) | **Start here:** GitHub, Supabase link, secrets, deploy, Claude MCP |
+| [docs/TEST_RESULTS_EXPLAINED.md](docs/TEST_RESULTS_EXPLAINED.md) | What the tests do and how to read the output (plain English) |
 | [docs/SPEC.md](docs/SPEC.md) | Product and technical specification |
 | [docs/PROJECT.md](docs/PROJECT.md) | CLI vs MCP, tokens, country strings, handbook |
 | [docs/mcp-claude.sample.json](docs/mcp-claude.sample.json) | Example Claude MCP config (URL + bearer token) |
