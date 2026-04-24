@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Beckerman Companion — sign in</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 36rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Beckerman Companion</h1>
+    <p>Enter your household access code (same as your private / Supabase companion secret).</p>
+    <p id="err" style="color: #b00020; display: none"></p>
+    <form id="f" method="post" action="#">
+      <input type="hidden" name="client_id" value="" />
+      <input type="hidden" name="redirect_uri" value="" />
+      <input type="hidden" name="state" value="" />
+      <input type="hidden" name="code_challenge" value="" />
+      <input type="hidden" name="code_challenge_method" value="" />
+      <input type="hidden" name="resource" value="" />
+      <input type="hidden" name="scope" value="" />
+      <p>
+        <label for="c">Access code</label><br />
+        <input
+          id="c"
+          name="companion_token"
+          type="password"
+          required
+          autocomplete="off"
+          size="50"
+          style="max-width: 100%; box-sizing: border-box"
+        />
+      </p>
+      <p><button type="submit">Continue</button></p>
+    </form>
+    <script>
+      ;(function () {
+        var f = document.getElementById('f')
+        var err = document.getElementById('err')
+        var p = new URLSearchParams(window.location.search)
+        var r = p.get('resource')
+        if (!r) {
+          err.textContent =
+            'Missing OAuth query. Open this page from Claude’s Connect flow (or after setting MCP_OAUTH_CONSENT_PAGE_URL and redeploying the Edge function).'
+          err.style.display = 'block'
+          f.style.display = 'none'
+          return
+        }
+        f.action = r.replace(/\/$/, '') + '/oauth/authorize'
+        var keys = [
+          'client_id',
+          'redirect_uri',
+          'state',
+          'code_challenge',
+          'code_challenge_method',
+          'resource',
+          'scope',
+        ]
+        for (var i = 0; i < keys.length; i++) {
+          var k = keys[i]
+          var el = f.elements.namedItem(k)
+          if (el) el.value = p.get(k) || ''
+        }
+      })()
+    </script>
+  </body>
+</html>

@@ -5,3 +5,5 @@
 node_modules/
 dist/
 .supabase/
+# Standalone git repo (GitHub Pages for OAuth); not part of this project’s history
+oauth-consent-public/
