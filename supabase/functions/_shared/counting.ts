@@ -220,20 +220,57 @@ export type CountResult = {
   days_present: number
   method: 'uk_midnight' | 'inclusive_presence'
   range_start: string
+  /** Effective end actually used for counting: `min(requested_end, today)` when `today` is supplied. */
   range_end: string
+  /** Days in the requested range that fall after `today` and were not counted (0 when `today` is not supplied). */
+  days_projected_remaining: number
   trips_considered: string[]
 }
 
+function daysInclusiveCount(start: string, end: string): number {
+  if (compareIsoDate(start, end) > 0) return 0
+  let n = 0
+  for (const _ of eachIsoDateInclusive(start, end)) n++
+  return n
+}
+
+/**
+ * Count days in a country within `range`.
+ *
+ * `today` (YYYY-MM-DD, server-side UTC) caps counting at "today": days strictly after
+ * `today` are reported in `days_projected_remaining` and excluded from `days_present`.
+ * When `today` is omitted the full range is counted (used by unit tests of pure
+ * counting math; the MCP tool always passes `today`).
+ */
 export function countDaysInCountry(
   person: Person,
   country: string,
   range: RangeInput,
   allTrips: TripRow[],
   seedCountry: string = SEED_COUNTRY,
+  today?: string,
 ): CountResult {
-  const { start: range_start, end: range_end } = resolveRange(range)
-  if (compareIsoDate(range_start, range_end) > 0) {
+  const { start: range_start, end: requested_end } = resolveRange(range)
+  if (compareIsoDate(range_start, requested_end) > 0) {
     throw new Error('Invalid range: start after end')
+  }
+
+  // Decide effective_end and the projected-remaining tail. We deliberately keep
+  // this simple: server UTC today, no timezone gymnastics. Near-midnight fuzziness
+  // of one day is acceptable at this scale.
+  let effective_end: string
+  let days_projected_remaining: number
+  if (today === undefined || compareIsoDate(today, requested_end) >= 0) {
+    effective_end = requested_end
+    days_projected_remaining = 0
+  } else if (compareIsoDate(today, range_start) < 0) {
+    // The whole window is in the future. Collapse effective end to range_start
+    // (a non-inverted display) and count zero days as present.
+    effective_end = range_start
+    days_projected_remaining = daysInclusiveCount(range_start, requested_end)
+  } else {
+    effective_end = today
+    days_projected_remaining = daysInclusiveCount(addOneDay(today), requested_end)
   }
 
   const personTrips = tripsForPerson(allTrips, person)
@@ -241,17 +278,24 @@ export function countDaysInCountry(
   const ukMemo = new Map<string, string>()
 
   let days_present = 0
-  for (const d of eachIsoDateInclusive(range_start, range_end)) {
-    if (countDayInCountry(d, country, personTrips, seedCountry, ukMemo)) {
-      days_present++
+  // Skip counting entirely when the whole window is in the future.
+  const counting_disabled =
+    today !== undefined && compareIsoDate(today, range_start) < 0
+  if (!counting_disabled) {
+    for (const d of eachIsoDateInclusive(range_start, effective_end)) {
+      if (countDayInCountry(d, country, personTrips, seedCountry, ukMemo)) {
+        days_present++
+      }
     }
   }
 
+  // trips_considered keeps using the requested window (not effective_end) so the
+  // returned set still describes "what trips were relevant to this query".
   const trips_considered = personTrips
     .filter(
       (t) =>
-        t.arrive_date <= range_end ||
-        (t.depart_date >= range_start && t.depart_date <= range_end),
+        t.arrive_date <= requested_end ||
+        (t.depart_date >= range_start && t.depart_date <= requested_end),
     )
     .map((t) => t.id)
     .sort()
@@ -260,7 +304,8 @@ export function countDaysInCountry(
     days_present,
     method,
     range_start,
-    range_end,
+    range_end: effective_end,
+    days_projected_remaining,
     trips_considered,
   }
 }

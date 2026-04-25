@@ -66,10 +66,12 @@ Inputs:
 
 Returns:
 
-- `days_present`: number
-- `method`: `uk_midnight` if country is `United Kingdom`, else `inclusive_presence`
-- `range_start`, `range_end`: resolved window
-- `trips_considered`: trip ids that fed the count (present in the shared counting module; **omitted in MCP tool responses** so the assistant’s context stays small)
+- `days_present`: number, days actually counted (today and earlier only).
+- `method`: `uk_midnight` if country is `United Kingdom`, else `inclusive_presence`.
+- `range_start`: requested start.
+- `range_end`: **effective** end actually used for counting, i.e. `min(requested_end, today)` (server-side UTC). When the whole window is in the future, this collapses to `range_start` so the displayed range is never inverted.
+- `days_projected_remaining`: count of days in the requested range that fall **after** today and were therefore not counted. Zero when the requested window ends today or earlier. Lets the assistant report "you have used X UK days, with Y days still to come in this period" without the tool ever projecting future presence as if it had happened.
+- `trips_considered`: trip ids that fed the count (present in the shared counting module; **omitted in MCP tool responses** so the assistant’s context stays small).
 
 ## Counting logic
 
@@ -89,6 +91,10 @@ Count `D` if, **after** applying all depart and arrive **events** on that calend
 ### Inclusive presence rule (all other countries)
 
 Count `D` if the person was in that country **at any time** that calendar day. Both `depart_date` and `arrive_date` count when they fall on days in that country.
+
+### Future-day clipping
+
+`days_in_country` only counts days up to and including **today** (server-side UTC). Days after today in the requested range are reported in `days_projected_remaining` instead. Without this, a query like "UK days in calendar year 2026" run in April would project the seed country forward and report ~360 UK days, which is dangerous near the 45-day cap. No timezone gymnastics: the one-day fuzziness near UTC midnight is acceptable at this scale.
 
 ### Tests
 

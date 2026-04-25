@@ -68,3 +68,18 @@ We removed every row whose notes look like a dummy end-to-end test. The clean-up
 
 **23. End-to-end: verify no dummy rows left**  
 We counted any rows that still had dummy end-to-end notes. The count should be zero when the run is healthy.
+
+**24. Past-only window: no future days projected**  
+We asked for UK days in a window that ended before today. The count is the full window and zero days are reported as still to come.
+
+**25. Window that crosses today: count stops at today**  
+We asked for UK days in a window that started before today and ended after today. The count goes up to today only and the days from tomorrow to the end of the window are reported as still to come.
+
+**26. Window entirely in the future: nothing counted yet**  
+We asked for UK days in a window that starts after today. The count is zero, the displayed end date collapses to the start date, and every day in the window is reported as still to come.
+
+**27. Current UK tax year: count stops at today, not 5 April**  
+We asked for UK days in the current UK tax year (today inside the window). The count covers 6 April up to today only, and the days from tomorrow through 5 April next year are reported as still to come.
+
+**28. Window that ends exactly today: behaves as a past window**  
+We asked for UK days in a window whose last day is today. The count covers the full window and zero days are reported as still to come.

@@ -419,4 +419,87 @@ describe('countDaysInCountry', () => {
     )
     expect(uk.days_present).toBe(6)
   })
+
+  // Future-day clipping: the MCP tool always passes server UTC today so that
+  // queries like "UK days in calendar year 2026" do not project the seed country
+  // forward and overcount. See docs/SPEC.md "Counting logic".
+  describe('today clipping (days_projected_remaining)', () => {
+    const TODAY = '2026-04-25'
+
+    it('past-only window: unchanged behaviour, projected_remaining is 0', () => {
+      const r = countDaysInCountry(
+        'simon',
+        'United Kingdom',
+        { type: 'custom', start: '2026-01-01', end: '2026-03-31' },
+        simon([]),
+        undefined,
+        TODAY,
+      )
+      expect(r.range_start).toBe('2026-01-01')
+      expect(r.range_end).toBe('2026-03-31')
+      expect(r.days_present).toBe(90) // Jan 31 + Feb 28 + Mar 31
+      expect(r.days_projected_remaining).toBe(0)
+    })
+
+    it('window that spans today: range_end capped at today, projected_remaining > 0', () => {
+      const r = countDaysInCountry(
+        'simon',
+        'United Kingdom',
+        { type: 'custom', start: '2026-04-01', end: '2026-12-31' },
+        simon([]),
+        undefined,
+        TODAY,
+      )
+      expect(r.range_end).toBe('2026-04-25')
+      // Apr 1..25 = 25 UK seed days
+      expect(r.days_present).toBe(25)
+      // 26 Apr..31 Dec 2026 = 250
+      expect(r.days_projected_remaining).toBe(250)
+    })
+
+    it('window entirely in the future: days_present 0, projected_remaining is full window', () => {
+      const r = countDaysInCountry(
+        'simon',
+        'United Kingdom',
+        { type: 'custom', start: '2027-01-01', end: '2027-12-31' },
+        simon([]),
+        undefined,
+        TODAY,
+      )
+      expect(r.days_present).toBe(0)
+      expect(r.range_end).toBe('2027-01-01') // collapsed to range_start per spec
+      expect(r.days_projected_remaining).toBe(365)
+    })
+
+    it('current UK tax year: count stops at today, not at 5 Apr 2027', () => {
+      const r = countDaysInCountry(
+        'simon',
+        'United Kingdom',
+        { type: 'uk_tax_year', year: 2026 },
+        simon([]),
+        undefined,
+        TODAY,
+      )
+      expect(r.range_start).toBe('2026-04-06')
+      expect(r.range_end).toBe('2026-04-25')
+      // 6 Apr..25 Apr 2026 = 20 UK seed days
+      expect(r.days_present).toBe(20)
+      // 26 Apr 2026..5 Apr 2027 = 345
+      expect(r.days_projected_remaining).toBe(345)
+    })
+
+    it('window that ends exactly today: behaves as past, projected_remaining is 0', () => {
+      const r = countDaysInCountry(
+        'simon',
+        'United Kingdom',
+        { type: 'custom', start: '2026-01-01', end: '2026-04-25' },
+        simon([]),
+        undefined,
+        TODAY,
+      )
+      expect(r.range_end).toBe('2026-04-25')
+      expect(r.days_present).toBe(115) // Jan 31 + Feb 28 + Mar 31 + Apr 25
+      expect(r.days_projected_remaining).toBe(0)
+    })
+  })
 })

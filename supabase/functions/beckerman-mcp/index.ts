@@ -169,7 +169,7 @@ function buildMcpServer(): McpServer {
     {
       title: 'days_in_country',
       description:
-        'Count days in a country. range: uk_tax_year | calendar_year | custom.',
+        'Count days in a country. range: uk_tax_year | calendar_year | custom. Counts up to today (server UTC); future days appear as days_projected_remaining and range_end is capped at today.',
       inputSchema: z.object({
         person: z.enum(['simon', 'chiara']),
         country: z.string().min(1),
@@ -213,11 +213,16 @@ function buildMcpServer(): McpServer {
           arrive_date: r.arrive_date as string,
           created_at: (r as { created_at?: string | null }).created_at ?? undefined,
         }))
+        // Server-side UTC today: keeps days_in_country honest about future days
+        // (see docs/SPEC.md "Counting logic"; no timezone work, accepted near-midnight fuzziness).
+        const today = new Date().toISOString().slice(0, 10)
         const result = countDaysInCountry(
           args.person,
           args.country,
           args.range as RangeInput,
           trips,
+          undefined,
+          today,
         )
         // Omit trip id list: large on busy years, not needed in Claude context.
         const { trips_considered: _ids, ...compact } = result
