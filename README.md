@@ -2,6 +2,16 @@
 
 Household tool for Simon and Chiara: **travel-day tracking** for UK Statutory Residence Test day counts, backed by Supabase and exposed to Claude (and similar clients) via **MCP**.
 
+## Canonical values
+
+| Item | Value |
+| ---- | ----- |
+| Repository | https://github.com/simonbeckerman/beckerman-companion |
+| Supabase project | `beckerman-companion` (ref `yszlwawwlfjrytwcbqpu`) |
+| Supabase dashboard | https://supabase.com/dashboard/project/yszlwawwlfjrytwcbqpu |
+| Edge function (production) | `beckerman-mcp` at https://yszlwawwlfjrytwcbqpu.supabase.co/functions/v1/beckerman-mcp |
+| OAuth consent page (GitHub Pages) | https://simonbeckerman.github.io/beckerman-companion-oauth/oauth-consent.html |
+
 ## Documentation
 
 Detail lives in `docs/`; this file is the short index and day-to-day checklist.
