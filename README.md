@@ -127,3 +127,11 @@ Check the output: your CLI may wrap JSON. Prefer the CSV from the table editor i
 **If the Edge Function is deleted or broken:** The code is in git (`supabase/functions/beckerman-mcp` and `supabase/functions/_shared`). [docs/CONNECT.md](docs/CONNECT.md) has link, `db push`, and `supabase functions deploy beckerman-mcp` again, then set secrets. Under ten minutes is realistic if the machine already has the CLI and login.
 
 **Token rotation (exact):** Generate new companion secrets, `supabase secrets set` with new `COMPANION_TOKEN_SIMON` / `COMPANION_TOKEN_CHIARA` (keep or rotate `MCP_OAUTH_JWT_SECRET` per [docs/CONNECT.md](docs/CONNECT.md)), update Cursor/`mcp.json` bearers if you use them, use **Connect** again in Claude’s custom connector if companion tokens changed, save in the password manager, `supabase functions deploy beckerman-mcp` if required, then restart the client.
+
+## Known limitations
+
+1. **OAuth consent page hosted on GitHub Pages.** The browser sign-in page that runs during Claude’s "Add custom connector" flow lives on GitHub Pages because this repo is private and [Pages is not available for private repos on the free plan](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits). If the GitHub repo’s visibility changes, or the GitHub Pages site goes down, the OAuth flow for hosted Claude (web/mobile) breaks. Static bearer auth via `mcp.json` (Cursor, Claude Desktop) is unaffected. Long-term fix: a [Supabase custom domain](https://supabase.com/docs/reference/cli/supabase-domains) so consent and MCP serve from one origin.
+
+2. **`trips_considered` not returned in MCP responses.** The counting function computes it, but the MCP handler strips it before responding, to keep responses compact. To debug "why is the count what it is", either run the counting function directly (`vitest`, an ad-hoc script) or query Supabase directly.
+
+3. **HMRC SRT deeming-day rule not implemented.** The day-count function does not implement the deeming-day rule (which makes some "transit" days count as UK days once you have ≥ 3 UK ties and exceed 30 qualifying days). At present we operate on the assumption of 2 UK ties, where deeming days do not apply. Revisit if Herzog/Pirola advise we have 3 ties for 2026-27.
