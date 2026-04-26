@@ -1,4 +1,4 @@
-# Beckerman Companion: project handbook
+# Margot: project handbook
 
 Long-lived operations and setup. Product and technical detail is in [SPEC.md](SPEC.md).
 

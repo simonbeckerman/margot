@@ -1,5 +1,5 @@
 ---
-description: Beckerman Companion project conventions and scope
+description: Margot project conventions and scope
 alwaysApply: true
 ---
 
@@ -7,7 +7,7 @@ alwaysApply: true
 
 This tool exists to prevent bad outcomes during a cross-border move from the UK to Israel: accidental UK tax residence, lost advisor context, decisions made twice because the first answer was forgotten. It stores facts, does arithmetic, and remembers things. It is not an advisor and never generates tax advice. When evaluating any change, ask whether it serves this purpose for two specific users, Simon and Chiara. If it does not, push back.
 
-# Beckerman Companion
+# Margot
 
 Household tool for Simon and Chiara. Current scope is travel-day tracking for UK Statutory Residence Test day counts only.
 

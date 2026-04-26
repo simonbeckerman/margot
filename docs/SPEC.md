@@ -1,6 +1,6 @@
-# Beckerman Companion: product and technical specification
+# Margot: product and technical specification
 
-Personal travel-day tracking via an MCP server. First feature of `beckerman-companion`: a two-person household tool for Simon Beckerman and Chiara, relocating from the UK to Israel, tracking UK days to reduce risk of accidental UK tax residence under the Statutory Residence Test. Later: advisor-answer memory, decision tracking, document grounding. **This phase is only travel days.**
+Personal travel-day tracking via an MCP server. First feature of `margot`: a two-person household tool for Simon Beckerman and Chiara, relocating from the UK to Israel, tracking UK days to reduce risk of accidental UK tax residence under the Statutory Residence Test. Later: advisor-answer memory, decision tracking, document grounding. **This phase is only travel days.**
 
 ## Stack
 
@@ -13,7 +13,7 @@ Provisioning and tooling (CLI, MCP in Cursor, GitHub) are in [PROJECT.md](PROJEC
 
 ## Database
 
-One Supabase project; preferred name **`beckerman-companion`** if it does not already exist. One table:
+One Supabase project; preferred name **`margot`** if it does not already exist. One table:
 
 ```sql
 trips

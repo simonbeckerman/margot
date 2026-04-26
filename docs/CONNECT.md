@@ -23,7 +23,7 @@ Log the CLI in (browser):
 supabase login
 ```
 
-Create a project named **beckerman-companion** in the [Supabase Dashboard](https://supabase.com/dashboard) if you do not have one yet. Copy the **project ref** (short id in the project URL).
+Create a project named **margot** in the [Supabase Dashboard](https://supabase.com/dashboard) if you do not have one yet. Copy the **project ref** (short id in the project URL).
 
 Link this repo to the project (include the **database password** you chose when creating the project so the CLI can use the **IPv4 pooler** on networks without IPv6):
 
@@ -37,7 +37,7 @@ If you already ran `supabase link` without `-p` and `supabase db push` fails wit
 You can also create a new project from the CLI (optional):
 
 ```bash
-supabase projects create beckerman-companion --org-id YOUR_ORG_ID --db-password 'YOUR_DATABASE_PASSWORD' --region eu-west-2
+supabase projects create margot --org-id YOUR_ORG_ID --db-password 'YOUR_DATABASE_PASSWORD' --region eu-west-2
 ```
 
 ## 3. Database migrations
@@ -126,7 +126,7 @@ This repo implements the **standard MCP OAuth path** Claude uses: unauthenticate
 **Setup (after §4 secrets and §5 deploy):**
 
 1. **Add custom connector**
-   - **Name:** e.g. `Beckerman Companion`
+   - **Name:** e.g. `Margot`
    - **URL:** `https://YOUR_PROJECT_REF.supabase.co/functions/v1/beckerman-mcp` (must end with `beckerman-mcp`, not truncated)
 2. **Advanced settings:** leave **OAuth Client ID** and **OAuth Client Secret** **empty** (our server advertises PKCE with public client; see [lazy authentication](https://claude.com/docs/connectors/building/lazy-authentication)).
 3. **Browser sign-in page (default Supabase URL):** On the default `*.supabase.co` function URL, the platform rewrites responses so the browser gets `text/plain`, so a sign-in form **served from that host will not render** (see [limits](https://supabase.com/docs/guides/functions/limits)). **Recommended:** set **`MCP_OAUTH_CONSENT_PAGE_URL`** to the public GitHub Pages URL of the consent page (this project uses [**simonbeckerman/beckerman-companion-oauth**](https://github.com/simonbeckerman/beckerman-companion-oauth): `https://simonbeckerman.github.io/beckerman-companion-oauth/oauth-consent.html` — see **§4**). The `/oauth/authorize` step **redirects** to that page with the same query string; you enter the access code; the page **POSTs** back to your function. **Alternative:** a [custom domain](https://supabase.com/docs/reference/cli/supabase-domains) on the Supabase project (HTML works there); then you can leave `MCP_OAUTH_CONSENT_PAGE_URL` unset.
