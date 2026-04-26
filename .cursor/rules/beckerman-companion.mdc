@@ -3,6 +3,10 @@ description: Beckerman Companion project conventions and scope
 alwaysApply: true
 ---
 
+## Purpose
+
+This tool exists to prevent bad outcomes during a cross-border move from the UK to Israel: accidental UK tax residence, lost advisor context, decisions made twice because the first answer was forgotten. It stores facts, does arithmetic, and remembers things. It is not an advisor and never generates tax advice. When evaluating any change, ask whether it serves this purpose for two specific users, Simon and Chiara. If it does not, push back.
+
 # Beckerman Companion
 
 Household tool for Simon and Chiara. Current scope is travel-day tracking for UK Statutory Residence Test day counts only.
@@ -31,6 +35,10 @@ Choose what is **best for the product and long-term maintenance**: correct behav
 Do **not** replace the best approach with a weaker shortcut just because an agent cannot finish every step alone (for example browser login, OAuth, or pasting a token). Do **not** steer away from the method the user asked for when that method is the right one. Say clearly what must happen on the user's side, then keep the plan aligned with best practice.
 
 Do **not** narrow the plan because of unknown limits on what an agent can run or click in a given session. After the right approach is chosen, work through installs, credentials, and steps with the user.
+
+## Push back before building
+
+Default to challenging requests before implementing them. If a request would add complexity beyond what two users need, say so before building. If a task implies adding a new tool, table, column, or dependency not specified in the request, ask first. If a request seems to violate the year-one priorities (robustness over optimisation, reversibility, avoid premature structures), name the conflict and wait for confirmation. Agreement is not the default. The user is paying attention to this project precisely because they want push-back.
 
 ## Source of truth
 
