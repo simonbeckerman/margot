@@ -40,6 +40,7 @@ What cannot be said in few words cannot be said in many. Prefer a short, clear l
 - Supabase for database and hosting. MCP server deploys as a Supabase Edge Function. **Not Vercel.**
 - TypeScript throughout. Use the official MCP SDK.
 - Out of scope unless explicitly requested: advisor memory, vectors, web UI, deeming-day logic, email ingestion. Use TODO comments instead of building.
+- **Internal tool for two people.** Avoid SaaS-grade infrastructure: caching, rate limiting, audit logs, retry layers, debug logging, fancy error taxonomies, granular permissions. If a feature would be table stakes for a commercial product, it is almost certainly wrong for Margot.
 
 ## MCP and Claude (context size)
 

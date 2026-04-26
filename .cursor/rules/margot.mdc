@@ -54,6 +54,7 @@ Default to challenging requests before implementing them. If a request would add
 - Supabase for database and hosting; MCP server deploys as a Supabase Edge Function (not Vercel).
 - TypeScript throughout; use the official MCP SDK.
 - Out of scope unless explicitly requested: advisor memory, vectors, web UI, deeming-day logic, email ingestion. Use TODO comments instead of building.
+- **Internal tool for two people.** Avoid SaaS-grade infrastructure: caching, rate limiting, audit logs, retry layers, debug logging, fancy error taxonomies, granular permissions. If a feature would be table stakes for a commercial product, it is almost certainly wrong for Margot.
 
 ## Git workflow
 
