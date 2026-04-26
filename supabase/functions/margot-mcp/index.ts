@@ -172,23 +172,24 @@ function buildMcpServer(): McpServer {
     {
       title: 'days_in_country',
       description:
-        'Count days in a country. range: uk_tax_year | calendar_year | custom. Counts up to today (server UTC); future days appear as days_projected_remaining and range_end is capped at today.',
+        'Count days in a country. range: uk_tax_year | calendar_year | custom. person defaults to authenticated user (override only when intentionally querying the spouse). Counts up to today (UTC); future days in days_projected_remaining; range_end capped at today.',
       inputSchema: z.object({
-        person: z.enum(['simon', 'chiara']),
+        person: z.enum(['simon', 'chiara']).optional(),
         country: z.string().min(1),
         range: rangeSchema,
       }),
     },
-    async (args) => {
-      // days_in_country: person comes from tool args; auth still validated at HTTP layer.
+    async (args, extra) => {
       const supabase = serviceSupabase()
+      const currentUser = personFromHandlerExtra(extra)
+      const person = args.person ?? currentUser
       try {
         const { data, error } = await supabase
           .from('trips')
           .select(
             'id, person, departure_country, arrival_country, depart_date, arrive_date, created_at',
           )
-          .eq('person', args.person)
+          .eq('person', person)
           .order('arrive_date', { ascending: true })
           .order('depart_date', { ascending: true })
           .order('id', { ascending: true })
@@ -220,7 +221,7 @@ function buildMcpServer(): McpServer {
         // (see docs/SPEC.md "Counting logic"; no timezone work, accepted near-midnight fuzziness).
         const today = new Date().toISOString().slice(0, 10)
         const result = countDaysInCountry(
-          args.person,
+          person,
           args.country,
           args.range as RangeInput,
           trips,
