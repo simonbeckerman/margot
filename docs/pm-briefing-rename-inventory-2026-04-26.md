@@ -6,6 +6,8 @@
 
 **Status (Phase 3, April 2026):** The Edge function slug in production is **`margot-mcp`**; the public OAuth / Pages repo is **`simonbeckerman/margot-oauth`** and the consent URL is **`https://simonbeckerman.github.io/margot-oauth/oauth-consent.html`**. The tables below are still an older snapshot; use current `README` and `docs/CONNECT` for live values.
 
+**Status (Phase 4, April 2026):** Cleanup is complete. The live consent page branding now says **Margot**, the rules file is renamed to **`.cursor/rules/margot.mdc`**, the old OAuth repo is archived, and only **`margot-mcp`** remains deployed in Supabase. The rename project is closed.
+
 **Purpose:** Full inventory of where the current product and technical names appear, before scoping a rename. No changes were made in the repo to produce this document.
 
 **Scope strings:** `Beckerman Companion`, `beckerman-companion`, `beckerman-mcp`, `beckerman-companion-oauth`, and `Beckerman` where it refers to the product (not `simonbeckerman` as GitHub username, email, or similar). **Person name** `Simon Beckerman` in the spec is noted but excluded as a product string.
