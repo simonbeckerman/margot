@@ -4,9 +4,6 @@ Lightweight backlog of feature ideas and known issues. Not a spec. Items here ar
 
 ## Features
 
-### list_trips
-
-Read-only MCP tool that lists trips from the database. Inputs: `person` (optional, default authenticated user), `range` (optional, e.g. future-only, past-only, all). Returns the trip rows. Useful for sanity-checking what is logged, especially booked future trips that `days_in_country` correctly excludes from counts.
 
 ### days_in_country: default person to authenticated user
 

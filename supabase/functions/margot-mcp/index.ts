@@ -244,6 +244,54 @@ function buildMcpServer(): McpServer {
     },
   )
 
+  server.registerTool(
+    'list_trips',
+    {
+      title: 'list_trips',
+      description:
+        'List logged trips. filter: all | past | future (default all). person defaults to authenticated user.',
+      inputSchema: z.object({
+        person: z.enum(['simon', 'chiara']).optional(),
+        filter: z.enum(['all', 'past', 'future']).optional(),
+      }),
+    },
+    async (args, extra) => {
+      const supabase = serviceSupabase()
+      const currentUser = personFromHandlerExtra(extra)
+      try {
+        const person = args.person ?? currentUser
+        const today = new Date().toISOString().slice(0, 10)
+        const filter = args.filter ?? 'all'
+
+        let q = supabase
+          .from('trips')
+          .select('id, person, departure_country, arrival_country, depart_date, arrive_date, notes')
+          .eq('person', person)
+
+        if (filter === 'past') q = q.lt('arrive_date', today)
+        else if (filter === 'future') q = q.gt('depart_date', today)
+
+        q = q.order('depart_date', { ascending: true })
+
+        const { data, error } = await q
+        if (error) throw error
+
+        const trips = data ?? []
+        return {
+          content: [
+            { type: 'text' as const, text: jsonLine({ trips, count: trips.length }) },
+          ],
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e)
+        return {
+          content: [{ type: 'text' as const, text: jsonLine({ error: msg }) }],
+          isError: true,
+        }
+      }
+    },
+  )
+
   return server
 }
 
