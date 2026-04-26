@@ -18,4 +18,8 @@ Improve the visual design of the GitHub-hosted OAuth consent page (`oauth-consen
 
 ## Issues
 
-(none currently)
+## Pending external
+
+### Custom connector icon
+
+The MCP server returns a custom icon (placeholder PNG, data URI) per the MCP protocol icon spec. Claude's UI does not currently render custom connector icons. Plumbing is in place; when Claude's UI catches up, the icon will appear automatically. Replace the placeholder with a real icon design at any time by updating `MCP_ICON_DATA_URI` in `supabase/functions/margot-mcp/index.ts` and redeploying.
