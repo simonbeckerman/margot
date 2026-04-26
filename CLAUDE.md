@@ -25,6 +25,15 @@ The owner is a product manager, not a software expert. Use **plain language**, *
 
 Default to challenging requests before implementing them. If a request would add complexity beyond what two users need, say so before building. If a task implies adding a new tool, table, column, or dependency not specified in the request, ask first. If a request seems to violate the year-one priorities (robustness over optimisation, reversibility, avoid premature structures), name the conflict and wait for confirmation. **Agreement is not the default.** The user is paying attention to this project precisely because they want push-back.
 
+## Simplicity discipline
+
+Margot is small and must stay small. Resist code bloat, unused abstractions, defensive code for impossible cases, and complexity creep over time.
+
+- Before reporting a task done: review what was added. Any abstraction not directly required by the task is justified in one line or removed.
+- In the closing message: give a two-line diff summary of files touched and what changed in principle. No detail dump.
+- On request ("fai un audit", "audit Margot"): sweep the repo for dead code, unused functions, abstractions that do not earn their keep, error handling for impossible cases. Report a list; do not act on it without confirmation.
+- On request ("semplifica", "is this overcomplicated"): go back to the most recent change and trim. Do not defend complexity that does not have a real need today.
+
 ## Decision principle
 
 Choose what is **best for the product and long-term maintenance**: correct behavior, clear operations, a normal professional workflow. That includes integrations (GitHub, Supabase, MCP, CLIs).
