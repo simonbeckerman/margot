@@ -2,6 +2,8 @@
 
 **Status (Phase 1, April 2026):** The product name in the repository is now **Margot** for titles and the local npm package, and the live Supabase project display name in docs is **`margot`**. The tables below are a **historical** snapshot and were accurate when this document was first written. Do not treat them as a current `grep` of the tree.
 
+**Status (Phase 2, April 2026):** The main GitHub repository is **`simonbeckerman/margot`** (formerly `beckerman-companion`). `origin` should be `https://github.com/simonbeckerman/margot.git`. Historical rows in the tables below may still mention the old repo name.
+
 **Purpose:** Full inventory of where the current product and technical names appear, before scoping a rename. No changes were made in the repo to produce this document.
 
 **Scope strings:** `Beckerman Companion`, `beckerman-companion`, `beckerman-mcp`, `beckerman-companion-oauth`, and `Beckerman` where it refers to the product (not `simonbeckerman` as GitHub username, email, or similar). **Person name** `Simon Beckerman` in the spec is noted but excluded as a product string.

@@ -6,7 +6,7 @@ Household tool for Simon and Chiara: **travel-day tracking** for UK Statutory Re
 
 | Item | Value |
 | ---- | ----- |
-| Repository | https://github.com/simonbeckerman/beckerman-companion |
+| Repository | https://github.com/simonbeckerman/margot |
 | Supabase project | `margot` (ref `yszlwawwlfjrytwcbqpu`) |
 | Supabase dashboard | https://supabase.com/dashboard/project/yszlwawwlfjrytwcbqpu |
 | Edge function (production) | `beckerman-mcp` at https://yszlwawwlfjrytwcbqpu.supabase.co/functions/v1/beckerman-mcp |

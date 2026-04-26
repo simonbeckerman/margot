@@ -16,7 +16,7 @@ Long-lived operations and setup. Product and technical detail is in [SPEC.md](SP
 
 On your Mac:
 
-1. **GitHub:** `gh auth login`, then from this repo: `gh repo create beckerman-companion --private --source=. --remote=origin --push` (change name or use `--public` if you want).
+1. **GitHub:** `gh auth login`, then from this repo: `gh repo create margot --private --source=. --remote=origin --push` (change name or use `--public` if you want).
 2. **Supabase CLI:** `supabase login`.
 3. **Supabase MCP in Cursor:** **Settings → Tools & MCP → Add MCP server** → type **HTTP** → URL `https://mcp.supabase.com/mcp` → complete login when prompted. Details: [Supabase MCP](https://supabase.com/docs/guides/getting-started/mcp).
 4. **Household API tokens** (once the Edge Function exists): two long random secrets in a password manager; set as function secrets and in each Claude connector. See [API tokens](#api-tokens-simon-and-chiara) below.
@@ -104,8 +104,8 @@ These are **not** Supabase dashboard passwords. They are **household API tokens*
 **With `gh` (after `gh auth login`):** from the repo root:
 
 ```bash
-cd /Users/simon/GitHub/beckerman-companion
-gh repo create beckerman-companion --private --source=. --remote=origin --push
+cd /Users/simon/GitHub/margot
+gh repo create margot --private --source=. --remote=origin --push
 ```
 
 Adjust visibility or name as needed. If `origin` already exists, use `git remote add origin ...` and `git push -u origin main`.
@@ -113,8 +113,8 @@ Adjust visibility or name as needed. If `origin` already exists, use `git remote
 **Without `gh`:** create an empty repository on GitHub (no README), then:
 
 ```bash
-cd /Users/simon/GitHub/beckerman-companion
-git remote add origin https://github.com/YOUR_USER/beckerman-companion.git
+cd /Users/simon/GitHub/margot
+git remote add origin https://github.com/YOUR_USER/margot.git
 git push -u origin main
 ```
 

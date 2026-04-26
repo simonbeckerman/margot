@@ -11,8 +11,8 @@ gh auth login
 Finish the browser or device flow. Then create the remote and push (skip if `origin` already exists and has commits):
 
 ```bash
-cd /path/to/beckerman-companion
-gh repo create beckerman-companion --private --source=. --remote=origin --push
+cd /path/to/margot
+gh repo create margot --private --source=. --remote=origin --push
 ```
 
 ## 2. Supabase account and project
@@ -28,7 +28,7 @@ Create a project named **margot** in the [Supabase Dashboard](https://supabase.c
 Link this repo to the project (include the **database password** you chose when creating the project so the CLI can use the **IPv4 pooler** on networks without IPv6):
 
 ```bash
-cd /path/to/beckerman-companion
+cd /path/to/margot
 supabase link --project-ref YOUR_PROJECT_REF -p 'YOUR_DATABASE_PASSWORD'
 ```
 
