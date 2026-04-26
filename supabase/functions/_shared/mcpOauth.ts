@@ -7,7 +7,7 @@
  */
 import type { HouseholdUser } from './auth.ts'
 
-const PRM_NAME = 'beckerman-mcp'
+const PRM_NAME = 'margot-mcp'
 const SCOPE = 'companion'
 const CHALLENGE_METHOD = 'S256'
 
@@ -112,7 +112,7 @@ export function mcpBaseUrlFromEnv(): string {
   const u = Deno.env.get('SUPABASE_URL')
   if (!u) return ''
   const host = new URL(u).host
-  return `https://${host}/functions/v1/beckerman-mcp`
+  return `https://${host}/functions/v1/margot-mcp`
 }
 
 export function mcpPrmUrl(): string {
@@ -323,10 +323,10 @@ export function buildAuthorizeFormPage(opts: {
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Beckerman Companion</title>
+<title>Margot</title>
 </head><body>
-<h1>Beckerman Companion</h1>
-<p>Enter your household access code (from your private note &mdash; same as stored in Supabase for you).</p>
+<h1>Margot</h1>
+<p>Enter your household access code (from your private note, same as stored in Supabase for you).</p>
 <form method="post" action="">
   <input type="hidden" name="client_id" value="${f(opts.clientId)}" />
   <input type="hidden" name="redirect_uri" value="${f(opts.redirectUri)}" />

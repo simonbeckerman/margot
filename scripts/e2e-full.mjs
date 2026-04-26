@@ -11,7 +11,7 @@ import process from 'node:process'
 
 const projectRef = process.env.SUPABASE_PROJECT_REF || 'yszlwawwlfjrytwcbqpu'
 const mcpUrl = process.env.MCP_URL ||
-  `https://${projectRef}.supabase.co/functions/v1/beckerman-mcp`
+  `https://${projectRef}.supabase.co/functions/v1/margot-mcp`
 
 const supabaseBin = process.env.SUPABASE_BIN || 'supabase'
 

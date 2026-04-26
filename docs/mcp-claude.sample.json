@@ -2,7 +2,7 @@
   "mcpServers": {
     "margot": {
       "type": "http",
-      "url": "https://yszlwawwlfjrytwcbqpu.supabase.co/functions/v1/beckerman-mcp",
+      "url": "https://yszlwawwlfjrytwcbqpu.supabase.co/functions/v1/margot-mcp",
       "headers": {
         "Authorization": "Bearer PASTE_SIMON_OR_CHIARA_TOKEN"
       }

@@ -26,7 +26,7 @@ The owner is **not** assumed to be a software expert. Use **plain language**, **
 
 ## MCP and Claude (context size)
 
-- The Edge `beckerman-mcp` tool should stay **tight** for the assistant: **short** tool `title` and `description` strings, **one-line** JSON in tool result text, and **no** large optional fields in responses (for example the trip id list is dropped on `days_in_country`; the shared module can still compute it for tests). Every token in tool metadata is paid on every turn that lists tools to the model.
+- The Edge `margot-mcp` tool should stay **tight** for the assistant: **short** tool `title` and `description` strings, **one-line** JSON in tool result text, and **no** large optional fields in responses (for example the trip id list is dropped on `days_in_country`; the shared module can still compute it for tests). Every token in tool metadata is paid on every turn that lists tools to the model.
 
 ## Decision principle
 

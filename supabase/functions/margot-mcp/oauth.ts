@@ -47,7 +47,7 @@ export function registerOAuthRoutes(app: Hono) {
     console.error('SUPABASE_URL missing; OAuth metadata URLs are wrong')
   }
 
-  app.get('/.well-known/oauth-protected-resource/beckerman-mcp', (c) => {
+  app.get('/.well-known/oauth-protected-resource/margot-mcp', (c) => {
     logOauth('prm', { ua: c.req.header('user-agent') ?? '' })
     return c.json(protectedResourceMetadata())
   })

@@ -69,7 +69,7 @@ function serviceSupabase(): ReturnType<typeof createClient> {
 
 function buildMcpServer(): McpServer {
   const server = new McpServer({
-    name: 'beckerman-companion',
+    name: 'margot',
     version: '0.1.0',
   })
 
@@ -285,7 +285,7 @@ function mcpRequestForStreamableHttp(req: Request, url: string): Request {
   })
 }
 
-const app = new Hono().basePath('/beckerman-mcp')
+const app = new Hono().basePath('/margot-mcp')
 registerOAuthRoutes(app)
 
 app.all('*', async (c) => {

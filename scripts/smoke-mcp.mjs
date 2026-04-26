@@ -9,7 +9,7 @@
  */
 
 const defaultUrl =
-  'https://yszlwawwlfjrytwcbqpu.supabase.co/functions/v1/beckerman-mcp'
+  'https://yszlwawwlfjrytwcbqpu.supabase.co/functions/v1/margot-mcp'
 
 const mcpUrl = process.env.MCP_URL || defaultUrl
 

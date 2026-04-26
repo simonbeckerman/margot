@@ -9,8 +9,8 @@ Household tool for Simon and Chiara: **travel-day tracking** for UK Statutory Re
 | Repository | https://github.com/simonbeckerman/margot |
 | Supabase project | `margot` (ref `yszlwawwlfjrytwcbqpu`) |
 | Supabase dashboard | https://supabase.com/dashboard/project/yszlwawwlfjrytwcbqpu |
-| Edge function (production) | `beckerman-mcp` at https://yszlwawwlfjrytwcbqpu.supabase.co/functions/v1/beckerman-mcp |
-| OAuth consent page (GitHub Pages) | https://simonbeckerman.github.io/beckerman-companion-oauth/oauth-consent.html |
+| Edge function (production) | `margot-mcp` at https://yszlwawwlfjrytwcbqpu.supabase.co/functions/v1/margot-mcp |
+| OAuth consent page (GitHub Pages) | https://simonbeckerman.github.io/margot-oauth/oauth-consent.html |
 
 ## Documentation
 
@@ -49,7 +49,7 @@ insert into public.trips (
 );
 ```
 
-Or use the **`log_trip`** MCP tool against the deployed `beckerman-mcp` function with a valid bearer token.
+Or use the **`log_trip`** MCP tool against the deployed `margot-mcp` function with a valid bearer token.
 
 ### Run tests
 
@@ -84,7 +84,7 @@ The script prints **new** `COMPANION_TOKEN_SIMON` and `COMPANION_TOKEN_CHIARA`. 
 ### Redeploy the MCP Edge Function
 
 ```bash
-supabase functions deploy beckerman-mcp
+supabase functions deploy margot-mcp
 ```
 
 ### Rotate household API tokens
@@ -99,22 +99,22 @@ Details: [docs/PROJECT.md](docs/PROJECT.md) (API tokens).
 ### OAuth (Claude) token lifetimes and `MCP_OAUTH_JWT_SECRET`
 
 - **Access tokens** issued by `/oauth/token` are **short-lived (1 hour)**; **refresh tokens** are **30 days** (replaced on each refresh in the current implementation). `MCP_OAUTH_JWT_SECRET` is read only from **Supabase Edge secrets** (or local env for `functions serve`); it is **not** committed to the repo.
-- **If `MCP_OAUTH_JWT_SECRET` leaks or you rotate it:** set a new value with `supabase secrets set MCP_OAUTH_JWT_SECRET='...'`, run `supabase functions deploy beckerman-mcp`, then have each user **Connect** again in Claude (and refresh any other clients that relied on the old secret’s tokens).
+- **If `MCP_OAUTH_JWT_SECRET` leaks or you rotate it:** set a new value with `supabase secrets set MCP_OAUTH_JWT_SECRET='...'`, run `supabase functions deploy margot-mcp`, then have each user **Connect** again in Claude (and refresh any other clients that relied on the old secret’s tokens).
 
 ### Verify the Claude-oriented OAuth build is what’s deployed
 
 After deploy, an unauthenticated POST should return **401** and include a **`www-authenticate`** header whose value mentions **`resource_metadata`** (MCP discovery). Example:
 
 ```bash
-curl -sS -D - -o /dev/null -X POST "https://<PROJECT_REF>.supabase.co/functions/v1/beckerman-mcp" \
+curl -sS -D - -o /dev/null -X POST "https://<PROJECT_REF>.supabase.co/functions/v1/margot-mcp" \
   -H "Content-Type: application/json" -d '{}'
 # Expect: HTTP/2 401 and a www-authenticate header containing resource_metadata=...
-# If that header is absent, redeploy `beckerman-mcp` (or confirm the latest code is live).
+# If that header is absent, redeploy `margot-mcp` (or confirm the latest code is live).
 ```
 
 ## Backup, recovery, and where the secrets live (two-person, low ceremony)
 
-**Write this down once** (password note or a private note, not the repo): Supabase **project ref**, dashboard URL, and Edge function URL: `https://<ref>.supabase.co/functions/v1/beckerman-mcp`. The ref also appears in [docs/CONNECT.md](docs/CONNECT.md) and in `scripts/e2e-full.mjs` as a default. Edge secrets include `COMPANION_TOKEN_SIMON`, `COMPANION_TOKEN_CHIARA`, and `MCP_OAUTH_JWT_SECRET` (values are not shown again in the UI after you set them, so your password manager is the long-term copy).
+**Write this down once** (password note or a private note, not the repo): Supabase **project ref**, dashboard URL, and Edge function URL: `https://<ref>.supabase.co/functions/v1/margot-mcp`. The ref also appears in [docs/CONNECT.md](docs/CONNECT.md) and in `scripts/e2e-full.mjs` as a default. Edge secrets include `COMPANION_TOKEN_SIMON`, `COMPANION_TOKEN_CHIARA`, and `MCP_OAUTH_JWT_SECRET` (values are not shown again in the UI after you set them, so your password manager is the long-term copy).
 
 **Backup `trips` manually (repeat when you like):** In the Supabase **Dashboard** → **Table editor** → `public.trips` → export as CSV, or in **SQL** run a `select` and download the result. If you use the **linked** CLI, you can point stdout to a file, for example:
 
@@ -124,9 +124,9 @@ supabase db query --linked "select coalesce(json_agg(t), '[]') from (select * fr
 
 Check the output: your CLI may wrap JSON. Prefer the CSV from the table editor if that is easier.
 
-**If the Edge Function is deleted or broken:** The code is in git (`supabase/functions/beckerman-mcp` and `supabase/functions/_shared`). [docs/CONNECT.md](docs/CONNECT.md) has link, `db push`, and `supabase functions deploy beckerman-mcp` again, then set secrets. Under ten minutes is realistic if the machine already has the CLI and login.
+**If the Edge Function is deleted or broken:** The code is in git (`supabase/functions/margot-mcp` and `supabase/functions/_shared`). [docs/CONNECT.md](docs/CONNECT.md) has link, `db push`, and `supabase functions deploy margot-mcp` again, then set secrets. Under ten minutes is realistic if the machine already has the CLI and login.
 
-**Token rotation (exact):** Generate new companion secrets, `supabase secrets set` with new `COMPANION_TOKEN_SIMON` / `COMPANION_TOKEN_CHIARA` (keep or rotate `MCP_OAUTH_JWT_SECRET` per [docs/CONNECT.md](docs/CONNECT.md)), update Cursor/`mcp.json` bearers if you use them, use **Connect** again in Claude’s custom connector if companion tokens changed, save in the password manager, `supabase functions deploy beckerman-mcp` if required, then restart the client.
+**Token rotation (exact):** Generate new companion secrets, `supabase secrets set` with new `COMPANION_TOKEN_SIMON` / `COMPANION_TOKEN_CHIARA` (keep or rotate `MCP_OAUTH_JWT_SECRET` per [docs/CONNECT.md](docs/CONNECT.md)), update Cursor/`mcp.json` bearers if you use them, use **Connect** again in Claude’s custom connector if companion tokens changed, save in the password manager, `supabase functions deploy margot-mcp` if required, then restart the client.
 
 ## Known limitations
 
