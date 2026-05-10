@@ -81,7 +81,7 @@ function buildMcpServer(): McpServer {
     {
       title: 'log_trip',
       description:
-        'Add one trip. Dates YYYY-MM-DD. person overrides row subject: only when intentionally logging for the other spouse.',
+        'Add one trip. Dates YYYY-MM-DD. person overrides row subject: only when intentionally logging for the other spouse. Rejects duplicates (same person + depart_date + countries).',
       inputSchema: z.object({
         person: z.enum(['simon', 'chiara']).optional(),
         departure_country: z.string().min(1),
@@ -111,6 +111,21 @@ function buildMcpServer(): McpServer {
           notes: args.notes ?? null,
           created_by: currentUser,
         }
+        const { data: dupes, error: dupErr } = await supabase
+          .from('trips')
+          .select('id')
+          .eq('person', person)
+          .eq('depart_date', row.depart_date)
+          .eq('departure_country', row.departure_country)
+          .eq('arrival_country', row.arrival_country)
+          .limit(1)
+        if (dupErr) throw dupErr
+        if (dupes && dupes.length > 0) {
+          throw new Error(
+            `Duplicate: ${person} already has a trip on ${row.depart_date} from ${row.departure_country} to ${row.arrival_country} (id: ${dupes[0].id}). Not inserted.`,
+          )
+        }
+
         const { data, error } = await supabase
           .from('trips')
           .insert(row)
