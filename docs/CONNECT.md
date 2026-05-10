@@ -12,7 +12,7 @@ Finish the browser or device flow. Then create the remote and push (skip if `ori
 
 ```bash
 cd /path/to/margot
-gh repo create margot --private --source=. --remote=origin --push
+gh repo create margot --public --source=. --remote=origin --push
 ```
 
 ## 2. Supabase account and project
@@ -79,13 +79,13 @@ supabase secrets set \
   MCP_OAUTH_JWT_SECRET='paste-third-secret'
 ```
 
-Optional, for **Claude Connect in the browser** on the default `*.supabase.co` URL. The app repo is **private**; [GitHub Pages is not available for private repos on the Free plan](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits), so the consent page is published from the small public repo [**simonbeckerman/margot-oauth**](https://github.com/simonbeckerman/margot-oauth) (a copy of [docs/oauth-consent.html](oauth-consent.html); keep them in sync if you change the page). Set:
+For **Claude Connect in the browser**, set the consent page URL (served via GitHub Pages from this public repo):
 
 ```bash
-supabase secrets set MCP_OAUTH_CONSENT_PAGE_URL='https://simonbeckerman.github.io/margot-oauth/oauth-consent.html'
+supabase secrets set MCP_OAUTH_CONSENT_PAGE_URL='https://simonbeckerman.github.io/margot/docs/oauth-consent.html'
 ```
 
-(After the first GitHub Actions deploy finishes, the URL above should load in a normal browser. If 404, wait a minute and refresh, or check **Settings → Pages** in that repo: source **GitHub Actions**.)
+Enable GitHub Pages in the repo first: **Settings → Pages → Source: Deploy from a branch → main / (root)**. The URL above should load within a minute. If 404, check that Pages is enabled and the deploy finished.
 
 For **local** `supabase functions serve`, export the same variables in your shell or use an env file your CLI version supports (`supabase functions serve --help`).
 
@@ -129,7 +129,7 @@ This repo implements the **standard MCP OAuth path** Claude uses: unauthenticate
    - **Name:** e.g. `Margot`
    - **URL:** `https://YOUR_PROJECT_REF.supabase.co/functions/v1/margot-mcp` (must end with `margot-mcp`, not truncated)
 2. **Advanced settings:** leave **OAuth Client ID** and **OAuth Client Secret** **empty** (our server advertises PKCE with public client; see [lazy authentication](https://claude.com/docs/connectors/building/lazy-authentication)).
-3. **Browser sign-in page (default Supabase URL):** On the default `*.supabase.co` function URL, the platform rewrites responses so the browser gets `text/plain`, so a sign-in form **served from that host will not render** (see [limits](https://supabase.com/docs/guides/functions/limits)). **Recommended:** set **`MCP_OAUTH_CONSENT_PAGE_URL`** to the public GitHub Pages URL of the consent page (this project uses [**simonbeckerman/margot-oauth**](https://github.com/simonbeckerman/margot-oauth): `https://simonbeckerman.github.io/margot-oauth/oauth-consent.html` — see **§4**). The `/oauth/authorize` step **redirects** to that page with the same query string; you enter the access code; the page **POSTs** back to your function. **Alternative:** a [custom domain](https://supabase.com/docs/reference/cli/supabase-domains) on the Supabase project (HTML works there); then you can leave `MCP_OAUTH_CONSENT_PAGE_URL` unset.
+3. **Browser sign-in page:** On the default `*.supabase.co` URL, Supabase rewrites responses so a sign-in form will not render (see [limits](https://supabase.com/docs/guides/functions/limits)). `MCP_OAUTH_CONSENT_PAGE_URL` (set in **§4**) tells the function to redirect to the GitHub Pages consent page instead. The `/oauth/authorize` step redirects there with the same query string; you enter the access code; the page POSTs back to your function.
 4. Save, then open the connector and click **Connect**. When the browser asks, sign in with **your** household access code (Simon’s or Chiara’s token — the long secret, not the Supabase dashboard password).
 
 **Other clients (Cursor, scripts):** keep using a static companion token: [mcp-claude.sample.json](mcp-claude.sample.json), [mcp.json.sample](mcp.json.sample), or `Authorization: Bearer` / `?companion_token=` as before.
@@ -142,7 +142,7 @@ npm test
 
 ## Troubleshooting
 
-- **Connect shows raw HTML source in the browser:** Expected on the default `*.supabase.co` URL ([platform limit](https://supabase.com/docs/guides/functions/limits)). Set **`MCP_OAUTH_CONSENT_PAGE_URL`** to a hosted [oauth-consent.html](oauth-consent.html) (see **§7**), redeploy the function, or use a **custom domain** for Edge Functions.
+- **Connect shows raw HTML source in the browser:** Expected on the default `*.supabase.co` URL ([platform limit](https://supabase.com/docs/guides/functions/limits)). Confirm `MCP_OAUTH_CONSENT_PAGE_URL` is set (§4) and the function is redeployed.
 - **401 from the function:** missing or wrong OAuth access token (Claude) or companion token (scripts), or `COMPANION_TOKEN_*` / `MCP_OAUTH_JWT_SECRET` not set on the project you deployed to.
 - **Claude never opens Connect / metadata errors:** confirm `MCP_OAUTH_JWT_SECRET` is set, redeploy the function, and that the connector URL is exactly `.../functions/v1/margot-mcp`.
 - **`supabase link` fails:** run `supabase login` again; confirm project ref.
