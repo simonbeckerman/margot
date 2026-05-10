@@ -4,6 +4,9 @@ Lightweight backlog of feature ideas and known issues. Not a spec. Items here ar
 
 ## Features
 
+### edit_trip and delete_trip MCP tools
+
+Today fixing or removing a trip means going to the Supabase dashboard. Worth adding `edit_trip` (change dates, countries, notes on an existing id) and `delete_trip` (remove by id) when this becomes a regular need. Delete is the riskier of the two: an agent hallucinating an id could remove a real trip. Consider requiring the user to confirm the row first (e.g. quote the depart_date back) before executing.
 
 ### make the GitHub OAuth token page prettier
 
