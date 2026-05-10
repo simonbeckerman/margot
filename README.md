@@ -10,7 +10,7 @@ Household tool for Simon and Chiara: **travel-day tracking** for UK Statutory Re
 | Supabase project | `margot` (ref `yszlwawwlfjrytwcbqpu`) |
 | Supabase dashboard | https://supabase.com/dashboard/project/yszlwawwlfjrytwcbqpu |
 | Edge function (production) | `margot-mcp` at https://yszlwawwlfjrytwcbqpu.supabase.co/functions/v1/margot-mcp |
-| OAuth consent page (GitHub Pages) | https://simonbeckerman.github.io/margot-oauth/oauth-consent.html |
+| OAuth consent page (GitHub Pages) | https://simonbeckerman.github.io/margot/docs/oauth-consent.html |
 
 ## Documentation
 
@@ -130,7 +130,7 @@ Check the output: your CLI may wrap JSON. Prefer the CSV from the table editor i
 
 ## Known limitations
 
-1. **OAuth consent page hosted on GitHub Pages.** The browser sign-in page that runs during Claude’s "Add custom connector" flow lives on GitHub Pages because this repo is private and [Pages is not available for private repos on the free plan](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits). If the GitHub repo’s visibility changes, or the GitHub Pages site goes down, the OAuth flow for hosted Claude (web/mobile) breaks. Static bearer auth via `mcp.json` (Cursor, Claude Desktop) is unaffected. Long-term fix: a [Supabase custom domain](https://supabase.com/docs/reference/cli/supabase-domains) so consent and MCP serve from one origin.
+1. **OAuth consent page hosted on GitHub Pages.** The browser sign-in page that runs during Claude’s "Add custom connector" flow is served from this public repo at `https://simonbeckerman.github.io/margot/docs/oauth-consent.html`. If GitHub Pages goes down, the OAuth flow for hosted Claude (web/mobile) breaks. Static bearer auth via `mcp.json` (Cursor, Claude Desktop) is unaffected.
 
 2. **`trips_considered` not returned in MCP responses.** The counting function computes it, but the MCP handler strips it before responding, to keep responses compact. To debug "why is the count what it is", either run the counting function directly (`vitest`, an ad-hoc script) or query Supabase directly.
 
