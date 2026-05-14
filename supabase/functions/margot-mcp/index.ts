@@ -308,6 +308,244 @@ function buildMcpServer(): McpServer {
     },
   )
 
+  server.registerTool(
+    'delete_trip',
+    {
+      title: 'delete_trip',
+      description:
+        'Move a trip to the deleted archive (recoverable via restore_trip). Pass the trip id. person defaults to authenticated user; set only to delete a trip belonging to the other spouse.',
+      inputSchema: z.object({
+        id: z.string().uuid(),
+        person: z.enum(['simon', 'chiara']).optional(),
+      }),
+    },
+    async (args, extra) => {
+      const supabase = serviceSupabase()
+      const currentUser = personFromHandlerExtra(extra)
+      try {
+        const person = args.person ?? currentUser
+
+        const { data: trip, error: fetchErr } = await supabase
+          .from('trips')
+          .select('*')
+          .eq('id', args.id)
+          .single()
+        if (fetchErr || !trip) throw new Error(`Trip not found: ${args.id}`)
+        if (trip.person !== person) {
+          throw new Error(
+            `Trip ${args.id} belongs to "${trip.person}", not "${person}". Pass person="${trip.person}" to delete it.`,
+          )
+        }
+
+        const { error: insertErr } = await supabase.from('deleted_trips').insert({
+          id: trip.id,
+          person: trip.person,
+          departure_country: trip.departure_country,
+          arrival_country: trip.arrival_country,
+          depart_date: trip.depart_date,
+          arrive_date: trip.arrive_date,
+          notes: trip.notes ?? null,
+          created_at: trip.created_at ?? null,
+          created_by: trip.created_by ?? null,
+          deleted_by: currentUser,
+        })
+        if (insertErr) throw insertErr
+
+        const { error: deleteErr } = await supabase.from('trips').delete().eq('id', args.id)
+        if (deleteErr) throw deleteErr
+
+        const warnings: string[] = []
+        if (args.person && args.person !== currentUser) {
+          warnings.push(`Deleted "${trip.person}"'s trip while signed in as "${currentUser}".`)
+        }
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: jsonLine(
+                warnings.length > 0
+                  ? { deleted: trip, warnings }
+                  : { deleted: trip },
+              ),
+            },
+          ],
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e)
+        return {
+          content: [{ type: 'text' as const, text: jsonLine({ error: msg }) }],
+          isError: true,
+        }
+      }
+    },
+  )
+
+  server.registerTool(
+    'edit_trip',
+    {
+      title: 'edit_trip',
+      description:
+        'Edit fields on an existing trip. Pass the trip id plus any fields to change (departure_country, arrival_country, depart_date, arrive_date, notes). person defaults to authenticated user.',
+      inputSchema: z.object({
+        id: z.string().uuid(),
+        person: z.enum(['simon', 'chiara']).optional(),
+        departure_country: z.string().min(1).optional(),
+        arrival_country: z.string().min(1).optional(),
+        depart_date: z.string().optional(),
+        arrive_date: z.string().optional(),
+        notes: z.string().optional(),
+      }),
+    },
+    async (args, extra) => {
+      const supabase = serviceSupabase()
+      const currentUser = personFromHandlerExtra(extra)
+      try {
+        const person = args.person ?? currentUser
+
+        const { data: existing, error: fetchErr } = await supabase
+          .from('trips')
+          .select('*')
+          .eq('id', args.id)
+          .single()
+        if (fetchErr || !existing) throw new Error(`Trip not found: ${args.id}`)
+        if (existing.person !== person) {
+          throw new Error(
+            `Trip ${args.id} belongs to "${existing.person}", not "${person}". Pass person="${existing.person}" to edit it.`,
+          )
+        }
+
+        const newDepart = args.depart_date ?? existing.depart_date
+        const newArrive = args.arrive_date ?? existing.arrive_date
+        if (args.depart_date && !isoDateOk(args.depart_date)) throw new Error('depart_date must be YYYY-MM-DD')
+        if (args.arrive_date && !isoDateOk(args.arrive_date)) throw new Error('arrive_date must be YYYY-MM-DD')
+        if (newDepart > newArrive) throw new Error('arrive_date must be on or after depart_date')
+
+        const patch: Record<string, unknown> = {}
+        if (args.departure_country != null) patch.departure_country = normalizeCountry(args.departure_country)
+        if (args.arrival_country != null) patch.arrival_country = normalizeCountry(args.arrival_country)
+        if (args.depart_date != null) patch.depart_date = args.depart_date
+        if (args.arrive_date != null) patch.arrive_date = args.arrive_date
+        if (args.notes != null) patch.notes = args.notes
+
+        if (Object.keys(patch).length === 0) throw new Error('No fields to update were provided.')
+
+        const { data: updated, error: updateErr } = await supabase
+          .from('trips')
+          .update(patch)
+          .eq('id', args.id)
+          .select()
+          .single()
+        if (updateErr) throw updateErr
+        if (!updated) throw new Error('Update returned no row')
+
+        const { data: others, error: listErr } = await supabase
+          .from('trips')
+          .select('id, depart_date, arrive_date')
+          .eq('person', person)
+          .neq('id', args.id)
+        if (listErr) throw listErr
+
+        const warnings: string[] = []
+        for (const o of others ?? []) {
+          if (!o.depart_date || !o.arrive_date) continue
+          if (
+            tripRangesOverlap(
+              { depart_date: newDepart, arrive_date: newArrive },
+              { depart_date: o.depart_date, arrive_date: o.arrive_date },
+            )
+          ) {
+            warnings.push(`Updated date range overlaps another trip (id: ${o.id}). Check both rows.`)
+            break
+          }
+        }
+        if (args.person && args.person !== currentUser) {
+          warnings.push(`Edited "${existing.person}"'s trip while signed in as "${currentUser}".`)
+        }
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: jsonLine(
+                warnings.length > 0
+                  ? { updated, was: existing, warnings }
+                  : { updated, was: existing },
+              ),
+            },
+          ],
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e)
+        return {
+          content: [{ type: 'text' as const, text: jsonLine({ error: msg }) }],
+          isError: true,
+        }
+      }
+    },
+  )
+
+  server.registerTool(
+    'restore_trip',
+    {
+      title: 'restore_trip',
+      description: 'Restore a previously deleted trip back to the active trips table. Pass the trip id from deleted_trips.',
+      inputSchema: z.object({
+        id: z.string().uuid(),
+      }),
+    },
+    async (args, extra) => {
+      const supabase = serviceSupabase()
+      const currentUser = personFromHandlerExtra(extra)
+      try {
+        const { data: archived, error: fetchErr } = await supabase
+          .from('deleted_trips')
+          .select('*')
+          .eq('id', args.id)
+          .single()
+        if (fetchErr || !archived) throw new Error(`No deleted trip found with id: ${args.id}`)
+
+        const { data: conflict } = await supabase
+          .from('trips')
+          .select('id')
+          .eq('id', args.id)
+          .single()
+        if (conflict) throw new Error(`A trip with id ${args.id} already exists in trips.`)
+
+        const { error: insertErr } = await supabase.from('trips').insert({
+          id: archived.id,
+          person: archived.person,
+          departure_country: archived.departure_country,
+          arrival_country: archived.arrival_country,
+          depart_date: archived.depart_date,
+          arrive_date: archived.arrive_date,
+          notes: archived.notes ?? null,
+          created_at: archived.created_at ?? null,
+          created_by: archived.created_by ?? currentUser,
+        })
+        if (insertErr) throw insertErr
+
+        const { error: deleteErr } = await supabase.from('deleted_trips').delete().eq('id', args.id)
+        if (deleteErr) throw deleteErr
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: jsonLine({ restored: archived, restored_by: currentUser }),
+            },
+          ],
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e)
+        return {
+          content: [{ type: 'text' as const, text: jsonLine({ error: msg }) }],
+          isError: true,
+        }
+      }
+    },
+  )
+
   return server
 }
 
