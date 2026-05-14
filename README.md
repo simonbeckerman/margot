@@ -49,7 +49,7 @@ insert into public.trips (
 );
 ```
 
-Or use the **`log_trip`** MCP tool against the deployed `margot-mcp` function with a valid bearer token.
+Or use the **`log_trip`** MCP tool against the deployed `margot-mcp` function with a valid bearer token. To correct or remove a trip after the fact, use **`edit_trip`** or **`delete_trip`** (both show a preview before writing; deleted trips go to `deleted_trips` and can be recovered with **`restore_trip`**).
 
 ### Run tests
 
