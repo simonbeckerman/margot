@@ -83,3 +83,27 @@ We asked for UK days in the current UK tax year (today inside the window). The c
 
 **28. Window that ends exactly today: behaves as a past window**  
 We asked for UK days in a window whose last day is today. The count covers the full window and zero days are reported as still to come.
+
+**29. log_trip: preview before insert**  
+We asked Claude to log a test trip (UK to Italy, 1-5 July 2026). The tool returned a preview with all fields normalized and asked for confirmation before inserting anything.
+
+**30. log_trip: insert on confirm**  
+We confirmed the preview. The trip was inserted and Claude reported the result. The row appeared in the database.
+
+**31. edit_trip: preview shows diff before saving**  
+We asked Claude to change the arrival date on the test trip to 7 July 2026. The tool returned a diff (arrive_date: 5 July → 7 July) and asked for confirmation before writing.
+
+**32. edit_trip: update on confirm**  
+We confirmed the edit. The trip was updated and Claude reported the new values alongside the original ones.
+
+**33. delete_trip: preview before delete**  
+We asked Claude to delete the test trip. The tool returned the full trip details and asked for confirmation before touching anything.
+
+**34. delete_trip: moves row to deleted_trips on confirm**  
+We confirmed the deletion. The row was removed from trips and appeared in deleted_trips. Database confirmed: 0 rows in trips, 1 in deleted_trips with notes "test".
+
+**35. restore_trip: recovers deleted row**  
+We asked Claude to restore the deleted trip. The row was moved back to trips with its original id and dates intact. No confirm step required.
+
+**36. Full cleanup: delete restored trip**  
+We deleted the restored test trip and confirmed. trips shows 0 test rows; deleted_trips retains the archive row.
