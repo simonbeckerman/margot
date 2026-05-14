@@ -81,7 +81,7 @@ function buildMcpServer(): McpServer {
     {
       title: 'log_trip',
       description:
-        'Add one trip. Dates YYYY-MM-DD. person overrides row subject: only when intentionally logging for the other spouse. Rejects duplicates (same person + depart_date + countries).',
+        'Add one trip. Dates YYYY-MM-DD. person overrides row subject: only when intentionally logging for the other spouse. Rejects duplicates (same person + depart_date + countries). Without confirm:true returns a preview for user approval; pass confirm:true to insert.',
       inputSchema: z.object({
         person: z.enum(['simon', 'chiara']).optional(),
         departure_country: z.string().min(1),
@@ -89,6 +89,7 @@ function buildMcpServer(): McpServer {
         depart_date: z.string(),
         arrive_date: z.string(),
         notes: z.string().optional(),
+        confirm: z.boolean().optional(),
       }),
     },
     async (args, extra) => {
@@ -126,19 +127,10 @@ function buildMcpServer(): McpServer {
           )
         }
 
-        const { data, error } = await supabase
-          .from('trips')
-          .insert(row)
-          .select()
-          .single()
-        if (error) throw error
-        if (!data) throw new Error('Insert returned no row')
-
         const { data: others, error: listErr } = await supabase
           .from('trips')
           .select('id, depart_date, arrive_date')
           .eq('person', person)
-          .neq('id', data.id)
         if (listErr) throw listErr
 
         const warnings: string[] = []
@@ -151,24 +143,43 @@ function buildMcpServer(): McpServer {
             )
           ) {
             warnings.push(
-              `This trip's date range overlaps another trip (id: ${o.id}). Check both rows for consistency.`,
+              `Date range overlaps another trip (id: ${o.id}). Check both rows for consistency.`,
             )
             break
           }
         }
         if (args.person && args.person !== currentUser) {
-          warnings.push(
-            `You logged for "${args.person}" while signed in as "${currentUser}" (see created_by in the row).`,
-          )
+          warnings.push(`Logging for "${args.person}" while signed in as "${currentUser}".`)
         }
+
+        if (!args.confirm) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: jsonLine({
+                  preview: row,
+                  warnings: warnings.length > 0 ? warnings : undefined,
+                  next: 'Pass confirm:true to insert this trip.',
+                }),
+              },
+            ],
+          }
+        }
+
+        const { data, error } = await supabase
+          .from('trips')
+          .insert(row)
+          .select()
+          .single()
+        if (error) throw error
+        if (!data) throw new Error('Insert returned no row')
 
         return {
           content: [
             {
               type: 'text' as const,
-              text: jsonLine(
-                warnings.length > 0 ? { ...data, warnings } : data,
-              ),
+              text: jsonLine(warnings.length > 0 ? { ...data, warnings } : data),
             },
           ],
         }
@@ -313,10 +324,11 @@ function buildMcpServer(): McpServer {
     {
       title: 'delete_trip',
       description:
-        'Move a trip to the deleted archive (recoverable via restore_trip). Pass the trip id. person defaults to authenticated user; set only to delete a trip belonging to the other spouse.',
+        'Move a trip to the deleted archive (recoverable via restore_trip). Pass the trip id. person defaults to authenticated user; set only to delete a trip belonging to the other spouse. Without confirm:true returns a preview for user approval; pass confirm:true to delete.',
       inputSchema: z.object({
         id: z.string().uuid(),
         person: z.enum(['simon', 'chiara']).optional(),
+        confirm: z.boolean().optional(),
       }),
     },
     async (args, extra) => {
@@ -337,6 +349,26 @@ function buildMcpServer(): McpServer {
           )
         }
 
+        const warnings: string[] = []
+        if (args.person && args.person !== currentUser) {
+          warnings.push(`Deleting "${trip.person}"'s trip while signed in as "${currentUser}".`)
+        }
+
+        if (!args.confirm) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: jsonLine({
+                  preview: trip,
+                  warnings: warnings.length > 0 ? warnings : undefined,
+                  next: 'Pass confirm:true to move this trip to the deleted archive.',
+                }),
+              },
+            ],
+          }
+        }
+
         const { error: insertErr } = await supabase.from('deleted_trips').insert({
           id: trip.id,
           person: trip.person,
@@ -353,11 +385,6 @@ function buildMcpServer(): McpServer {
 
         const { error: deleteErr } = await supabase.from('trips').delete().eq('id', args.id)
         if (deleteErr) throw deleteErr
-
-        const warnings: string[] = []
-        if (args.person && args.person !== currentUser) {
-          warnings.push(`Deleted "${trip.person}"'s trip while signed in as "${currentUser}".`)
-        }
 
         return {
           content: [
@@ -386,7 +413,7 @@ function buildMcpServer(): McpServer {
     {
       title: 'edit_trip',
       description:
-        'Edit fields on an existing trip. Pass the trip id plus any fields to change (departure_country, arrival_country, depart_date, arrive_date, notes). person defaults to authenticated user.',
+        'Edit fields on an existing trip. Pass the trip id plus any fields to change (departure_country, arrival_country, depart_date, arrive_date, notes). person defaults to authenticated user. Without confirm:true returns a preview for user approval; pass confirm:true to save.',
       inputSchema: z.object({
         id: z.string().uuid(),
         person: z.enum(['simon', 'chiara']).optional(),
@@ -395,6 +422,7 @@ function buildMcpServer(): McpServer {
         depart_date: z.string().optional(),
         arrive_date: z.string().optional(),
         notes: z.string().optional(),
+        confirm: z.boolean().optional(),
       }),
     },
     async (args, extra) => {
@@ -430,15 +458,6 @@ function buildMcpServer(): McpServer {
 
         if (Object.keys(patch).length === 0) throw new Error('No fields to update were provided.')
 
-        const { data: updated, error: updateErr } = await supabase
-          .from('trips')
-          .update(patch)
-          .eq('id', args.id)
-          .select()
-          .single()
-        if (updateErr) throw updateErr
-        if (!updated) throw new Error('Update returned no row')
-
         const { data: others, error: listErr } = await supabase
           .from('trips')
           .select('id, depart_date, arrive_date')
@@ -460,8 +479,38 @@ function buildMcpServer(): McpServer {
           }
         }
         if (args.person && args.person !== currentUser) {
-          warnings.push(`Edited "${existing.person}"'s trip while signed in as "${currentUser}".`)
+          warnings.push(`Editing "${existing.person}"'s trip while signed in as "${currentUser}".`)
         }
+
+        // Build a human-readable diff of what will change
+        const changes: Record<string, { from: unknown; to: unknown }> = {}
+        for (const key of Object.keys(patch)) {
+          changes[key] = { from: existing[key], to: patch[key] }
+        }
+
+        if (!args.confirm) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: jsonLine({
+                  preview: { id: args.id, person, changes },
+                  warnings: warnings.length > 0 ? warnings : undefined,
+                  next: 'Pass confirm:true to save these changes.',
+                }),
+              },
+            ],
+          }
+        }
+
+        const { data: updated, error: updateErr } = await supabase
+          .from('trips')
+          .update(patch)
+          .eq('id', args.id)
+          .select()
+          .single()
+        if (updateErr) throw updateErr
+        if (!updated) throw new Error('Update returned no row')
 
         return {
           content: [
